@@ -15,8 +15,10 @@ typedef struct node{
     node* next;
 }node;
 
-void nodeInit(){
-    
+void nodeInit(node *n){
+    n->address = "00000000";
+    n->data = 0;
+    n->next = NULL;
 }
 
 const int ELEMENTS = 65536; //2^16 - 2^32 seems like a lot of space
@@ -28,16 +30,16 @@ int hash(string address){
 
 typedef struct hashTable{// this will act as memory
     node* Table[ELEMENTS];
-}hashTable;
+}hashT;
 
-void hashInit(){
+void hashInit(hashT* h){
     for(int i = 0; i < ELEMENTS; i++){
-
+        nodeInit(h->Table[i]);
     }
 }
 
-void hashInsert(string Address, int data){
-
+void hashInsert(string Address, int data, hashT* h){
+    
 }
 
 void Instructions(vector<string> *instr, string fileName){
