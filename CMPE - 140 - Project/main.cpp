@@ -10,20 +10,18 @@ using namespace std;
 int t[32];//global array of registers
 
 typedef struct node{
-    string address;
-    int data;
-    node* next;
+    string address;//binary address from the instruction
+    int data;//data to be stored
 }node;
 
 void nodeInit(node *n){
-    n->address = "00000000";
+    n->address = "00000000";//set for default check
     n->data = 0;
-    n->next = NULL;
 }
 
 const int ELEMENTS = 65536; //2^16 - 2^32 seems like a lot of space
 
-int hash(string address){
+int hashS(string address){
     int index = stoi(address, nullptr, 2);
     return index % ELEMENTS;
 }
@@ -38,8 +36,14 @@ void hashInit(hashT* h){
     }
 }
 
-void hashInsert(string Address, int data, hashT* h){
+void hashInsert(string address, int data, hashT* h){
+    int index = hashS(address) % ELEMENTS;
     
+    while(h->Table[index]->address != "00000000"){//while this is already an entry at that location
+        index++;
+    }
+    h->Table[index]->address = address;
+    h->Table[index]->data = data;
 }
 
 void Instructions(vector<string> *instr, string fileName){
@@ -175,13 +179,37 @@ void lType(string instruction){
 }
 
 void sType(string instruction){
-    string funct3, rs1, rs2, immed, immed2;
+    string funct3, rs1, rs2, immed1, immed2;
     //decode
-    immed = instruction.substr(0,7);// 7 bits
+    immed1 = instruction.substr(0,7);// 7 bits
     immed2 = instruction.substr(20,5);// 5 bits
     funct3 = instruction.substr(17,3);// 3 bits
     rs1 = instruction.substr(12,5);// 5 bits
     rs2 = instruction.substr(7,5);// 5 bits
+
+    int r1, r2, data1, data2;
+    r1 = stoi(rs1, nullptr, 2);
+    r2 = stoi(rs2, nullptr, 2);
+    data1 = stoi(immed1, nullptr, 2);
+    data2 = stoi(immed2, nullptr, 2);
+
+    if(immed1[0] == '1'){//check if the number is negative in binary
+        data1 = data1 - pow(2, immed1.length());//sub from the largest possible negative number
+    }
+    if(immed2[0] == '1'){//check if the number is negative in binary
+        data2 = data2 - pow(2, immed2.length());//sub from the largest possible negative number
+    }
+
+    if(funct3 == "000"){//sb
+        
+    }
+    else if(funct3 == "001"){//sh
+        
+    }
+    else if(funct3 == "010"){//sw
+        
+    }
+    
 }
 
 void decode(string instruction){
