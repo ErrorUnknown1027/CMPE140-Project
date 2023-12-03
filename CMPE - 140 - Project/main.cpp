@@ -9,52 +9,75 @@ using namespace std;
 
 int t[32];//global array of registers
 
+typedef struct node{
+    string address;
+    int data;
+    node* next;
+}node;
+
+void nodeInit(){
+    
+}
+
+const int ELEMENTS = 65536; //2^16 - 2^32 seems like a lot of space
+
+int hash(string address){
+    int index = stoi(address, nullptr, 2);
+    return index % ELEMENTS;
+}
+
+typedef struct hashTable{// this will act as memory
+    node* Table[ELEMENTS];
+}hashTable;
+
+void hashInit(){
+    for(int i = 0; i < ELEMENTS; i++){
+
+    }
+}
+
+void hashInsert(string Address, int data){
+
+}
+
 void Instructions(vector<string> *instr, string fileName){
-    ifstream in(fileName);
-    //in.open(fileName);//open file
-    if(!in){
+    ifstream in(fileName);//open chosen file
+    if(!in){//open check
         cerr << "Failed to open file" << endl;
         return;
     }
 
     string line, temp;
-    int count = 0;
+    int count = 0;//counter
 
     while(getline(in, line)){
-        if(count < 4){
-            count++;
-            temp = line + temp;
+        if(count < 4){//if less than 4 line pulls
+            count++;//increment
+            temp = line + temp;//add new 8 bits to the full instruction
         }
-        if(count == 4){
-            count = 0;
-            instr->push_back(temp);
-            //cout << temp << " bit count : " << temp.length() << endl;
-            temp.clear();
+        if(count == 4){//at 4 pulls
+            count = 0;//reset counter
+            instr->push_back(temp);//add full instruction to the front of the vector
+            temp.clear();//clear the string
         }
     }
-
+    return;
 }
 
 void iType(string instruction){
     string funct3, rs1, rd, immed;
     //decode
-    immed = instruction.substr(0,12);
-    funct3 = instruction.substr(17,3);
-    rs1 = instruction.substr(12,5);
-    rd = instruction.substr(20,5);
-    //cout << "opcode in decimal : " << b2int(instruction.substr(25,7)) << endl;
-
-    // cout << "funct3 : " << funct3 << endl;
-    // cout << "rs1 : " << rs1 << endl;
-    // cout << "rd : " << rd << endl;
-    // cout << "immed : " << immed << endl;
+    immed = instruction.substr(0,12);//12 bits
+    funct3 = instruction.substr(17,3);// 3 bits
+    rs1 = instruction.substr(12,5);//5 bits
+    rd = instruction.substr(20,5);// 5 bits
 
     int r1, r2, data;
-    r1 = stoi(rs1, nullptr, 2);
-    r2 = stoi(rd, nullptr, 2);
-    data = stoi(immed, nullptr, 2);
-    if(immed[0] == '1'){//checking is signed
-        data = data - pow(2, immed.length());
+    r1 = stoi(rs1, nullptr, 2);// convert to int
+    r2 = stoi(rd, nullptr, 2);//convert to int
+    data = stoi(immed, nullptr, 2);//convert to int
+    if(immed[0] == '1'){//check if the number is negative in binary
+        data = data - pow(2, immed.length());//sub from the largest possible negative number
     }
 
     if(funct3 == "000"){//addi
@@ -92,21 +115,17 @@ void iType(string instruction){
 void rType(string instruction){
     string funct3, rs1, rs2, rd, immed;
     //decode
-    immed = instruction.substr(0,7);
-    funct3 = instruction.substr(17,3);
-    rs1 = instruction.substr(12,5);
-    rs2 = instruction.substr(7,5);
-    rd = instruction.substr(20,5);
+    immed = instruction.substr(0,7);// 7 bits
+    funct3 = instruction.substr(17,3);// 3 bits
+    rs1 = instruction.substr(12,5);// 5 bits
+    rs2 = instruction.substr(7,5);// 5 bits
+    rd = instruction.substr(20,5);// 5 bits
 
     int r1, r2, r3, data;
-    r1 = stoi(rs1, nullptr, 2);
-    r2 = stoi(rd, nullptr, 2);
-    r3 = stoi(rs2, nullptr, 2);
-    data = stoi(immed, nullptr, 2);
-
-    if(immed[0] == '1'){//checking is signed
-        data = data - pow(2, immed.length());
-    }
+    r1 = stoi(rs1, nullptr, 2);// convert to int
+    r2 = stoi(rd, nullptr, 2);// convert to int
+    r3 = stoi(rs2, nullptr, 2);// convert to int
+    //we dont convert the immed to an int since we aren't using it for any calcualtions
 
     if(funct3 == "000"){//add and sub
         if(immed == "0000000"){//add
@@ -132,7 +151,7 @@ void rType(string instruction){
         if(immed == "0000000"){//srl
             t[r2] = (unsigned int)t[r1] >> (unsigned int)t[r3];
         }
-        else if(immed == "0100000"){
+        else if(immed == "0100000"){//sra
             t[r2] = t[r1] >> t[r3];
         }
     }
@@ -142,6 +161,25 @@ void rType(string instruction){
     else if(funct3 == "111"){//and
         t[r2] = t[r1] & t[r3];
     }
+}
+
+void lType(string instruction){
+    string funct3, rs1, rd, immed;
+    //decode
+    immed = instruction.substr(0,12);// 12 bits
+    funct3 = instruction.substr(17,3);// 3 bits
+    rs1 = instruction.substr(12,5);// 5 bits
+    rd = instruction.substr(20,5);// 5 bits
+}
+
+void sType(string instruction){
+    string funct3, rs1, rs2, immed, immed2;
+    //decode
+    immed = instruction.substr(0,7);// 7 bits
+    immed2 = instruction.substr(20,5);// 5 bits
+    funct3 = instruction.substr(17,3);// 3 bits
+    rs1 = instruction.substr(12,5);// 5 bits
+    rs2 = instruction.substr(7,5);// 5 bits
 }
 
 void decode(string instruction){
@@ -156,6 +194,12 @@ void decode(string instruction){
     }
     else if(opcode == "0110011"){//r - type instrucitons
         rType(instruction);
+    }
+    else if(opcode == "0000011"){//l - type instructions
+        lType(instruction);
+    }
+    else if(opcode == "0100011"){//s - type instructions
+        sType(instruction);
     }
 }
 
