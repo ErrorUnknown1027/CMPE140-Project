@@ -103,10 +103,45 @@ void rType(string instruction){
     r2 = stoi(rd, nullptr, 2);
     r3 = stoi(rs2, nullptr, 2);
     data = stoi(immed, nullptr, 2);
+
     if(immed[0] == '1'){//checking is signed
         data = data - pow(2, immed.length());
     }
 
+    if(funct3 == "000"){//add and sub
+        if(immed == "0000000"){//add
+            t[r2] = t[r1] + t[r3];
+        }
+        else if(immed == "0100000"){
+            t[r2] = t[r1] - t[r3];
+        }
+    }
+    else if(funct3 == "001"){//sll
+        t[r2] = t[r1] << t[r3];
+    }
+    else if(funct3 == "010"){//slt
+        t[r2] = (t[r1] < t[r3]) ? 1 : 0;
+    }
+    else if(funct3 == "011"){//sltu
+        t[r2] = ((unsigned int)t[r1] < (unsigned int)t[r3]) ? 1 : 0;
+    }
+    else if(funct3 == "100"){//xor
+        t[r2] = t[r1] ^ t[r3];
+    }
+    else if(funct3 == "101"){//srl and sra
+        if(immed == "0000000"){//srl
+            t[r2] = (unsigned int)t[r1] >> (unsigned int)t[r3];
+        }
+        else if(immed == "0100000"){
+            t[r2] = t[r1] >> t[r3];
+        }
+    }
+    else if(funct3 == "110"){//or
+        t[r2] = t[r1] | t[r3];
+    }
+    else if(funct3 == "111"){//and
+        t[r2] = t[r1] & t[r3];
+    }
 }
 
 void decode(string instruction){
@@ -125,7 +160,7 @@ void decode(string instruction){
 }
 
 int main() {
-    string file = "addi_hazards.dat";
+    string file = "r_type.dat";
     vector<string> instr;
     //cout << "input a file name" << endl;
     //cin >> file;
