@@ -53,9 +53,8 @@ void iType(string instruction){
     r1 = stoi(rs1, nullptr, 2);
     r2 = stoi(rd, nullptr, 2);
     data = stoi(immed, nullptr, 2);
-
     if(immed[0] == '1'){//checking is signed
-        data = data - 4096;
+        data = data - pow(2, immed.length());
     }
 
     if(funct3 == "000"){//addi
@@ -90,6 +89,26 @@ void iType(string instruction){
     
 }
 
+void rType(string instruction){
+    string funct3, rs1, rs2, rd, immed;
+    //decode
+    immed = instruction.substr(0,7);
+    funct3 = instruction.substr(17,3);
+    rs1 = instruction.substr(12,5);
+    rs2 = instruction.substr(7,5);
+    rd = instruction.substr(20,5);
+
+    int r1, r2, r3, data;
+    r1 = stoi(rs1, nullptr, 2);
+    r2 = stoi(rd, nullptr, 2);
+    r3 = stoi(rs2, nullptr, 2);
+    data = stoi(immed, nullptr, 2);
+    if(immed[0] == '1'){//checking is signed
+        data = data - pow(2, immed.length());
+    }
+
+}
+
 void decode(string instruction){
     //find opcode
     string opcode;
@@ -99,6 +118,9 @@ void decode(string instruction){
     if(opcode == "0010011"){//i - type instructions
         //cout << "I type instruction" << endl;
         iType(instruction);
+    }
+    else if(opcode == "0110011"){//r - type instrucitons
+        rType(instruction);
     }
 }
 
