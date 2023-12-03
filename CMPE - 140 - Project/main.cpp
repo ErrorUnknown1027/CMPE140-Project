@@ -9,19 +9,6 @@ using namespace std;
 
 int t[32];//global array of registers
 
-int b2int(string binary){
-    int total = 0;
-    int power = binary.length() - 1;
-    for(char digit : binary){
-        if(digit == '1'){
-            total += pow(2,power);
-        }
-        power--;
-    }
-    //cout << total << endl;
-    return total;
-}
-
 void Instructions(vector<string> *instr, string fileName){
     ifstream in(fileName);
     //in.open(fileName);//open file
