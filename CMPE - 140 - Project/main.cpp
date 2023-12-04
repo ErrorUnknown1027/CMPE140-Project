@@ -46,6 +46,27 @@ void hashInsert(string address, int data, hashT* h){
     h->Table[index]->data = data;
 }
 
+int hashPull(string address, hashT* h){
+    int index  = hashS(address) % ELEMENTS;
+    while(h->Table[index]->address != address){
+        index++;
+    }
+    return h->Table[index]->data;
+}
+
+hashT h;//global hashTable
+
+string bin2str(int bin){
+    string binary; 
+    int bits = 32;
+    for(int i = bits -1; i >= 0; i--){
+        int bit = (bin >> i) & 1;
+        binary += (bit + '0');
+    }
+
+    return binary;
+}
+
 void Instructions(vector<string> *instr, string fileName){
     ifstream in(fileName);//open chosen file
     if(!in){//open check
@@ -176,6 +197,67 @@ void lType(string instruction){
     funct3 = instruction.substr(17,3);// 3 bits
     rs1 = instruction.substr(12,5);// 5 bits
     rd = instruction.substr(20,5);// 5 bits
+
+    int r1, r2, data1;
+    r1 = stoi(rs1, nullptr, 2);
+    r2 = stoi(rd, nullptr, 2);
+    data1 = stoi(immed, nullptr, 2);
+
+    if(immed[0] == '1'){//check if the number is negative in binary
+        data1 = data1 - pow(2, immed.length());//sub from the largest possible negative number
+    }
+
+    if(funct3 == "000"){//lb
+        string address;
+        string byte;
+        int data;
+        int add = t[r1] + data1;//get address
+        address = bin2str(add);//convert to a string
+        data = hashPull(address, &h);//pulls the data from that address
+        byte = bin2str(data);//convert to a string
+        t[r2] = stoi(byte.substr(byte.length()-8, 8), nullptr, 2);//convert the last 8 bits to int
+    }
+    else if(funct3 == "001"){//lh
+        string address;
+        string half;
+        int data;
+        int add = t[r1] + data1;//get address
+        address = bin2str(add);//convert to a string
+        data = hashPull(address, &h);//pulls the data from that address
+        half = bin2str(data);//convert to a string
+        t[r2] = stoi(half.substr(half.length()-16, 16), nullptr, 2);//convert the last 8 bits to int
+    }
+    else if(funct3 == "010"){//lw
+        string address;
+        string word;
+        int data;
+        int add = t[r1] + data1;//get address
+        address = bin2str(add);//convert to a string
+        data = hashPull(address, &h);//pulls the data from that address
+        word = bin2str(data);//convert to a string
+        t[r2] = stoi(word, nullptr, 2);//convert the last 8 bits to int
+    }
+    else if(funct3 == "100"){//lbu
+        string address;
+        string byte;
+        int data;
+        int add = t[r1] + data1;//get address
+        address = bin2str(add);//convert to a string
+        data = hashPull(address, &h);//pulls the data from that address
+        byte = bin2str(data);//convert to a string
+        t[r2] = (unsigned int)stoi(byte.substr(byte.length()-8, 8), nullptr, 2);//convert the last 8 bits to int
+        
+    }
+    else if(funct3 == "101"){//lhu
+        string address;
+        string half;
+        int data;
+        int add = t[r1] + data1;//get address
+        address = bin2str(add);//convert to a string
+        data = hashPull(address, &h);//pulls the data from that address
+        half = bin2str(data);//convert to a string
+        t[r2] = (unsigned int)stoi(half.substr(half.length()-16, 16), nullptr, 2);//convert the last 8 bits to int
+    }
 }
 
 void sType(string instruction){
@@ -200,14 +282,23 @@ void sType(string instruction){
         data2 = data2 - pow(2, immed2.length());//sub from the largest possible negative number
     }
 
-    if(funct3 == "000"){//sb
-        
+    if(funct3 == "000"){//sb - 8 bits
+        int store;
+        string address;
+        address = t[r1] + data1;
+        store = t[r2] + data2;
     }
-    else if(funct3 == "001"){//sh
-        
+    else if(funct3 == "001"){//sh - 16 bits
+        int store;
+        string address;
+        address = t[r1] + data1;
+        store = t[r2] + data2;
     }
-    else if(funct3 == "010"){//sw
-        
+    else if(funct3 == "010"){//sw - 32 bits
+        int store;
+        string address;
+        address = t[r1] + data1;
+        store = t[r2] + data2;
     }
     
 }
@@ -234,7 +325,7 @@ void decode(string instruction){
 }
 
 int main() {
-    string file = "r_type.dat";
+    string file = "ldst.dat";
     vector<string> instr;
     //cout << "input a file name" << endl;
     //cin >> file;
@@ -243,12 +334,6 @@ int main() {
     for(int i = 0; i < 32; i++){//initialize the registers
         t[i] = 0; 
     }
-    
-    // for(int i = 0; i < instr.size(); i++){
-    //     cout << instr[i] << " bits count : " << instr[i].length() << endl;
-    // }
-
-    //cout << endl << endl;
 
     for(int i = 0; i < instr.size(); i++){
         decode(instr[i]);
