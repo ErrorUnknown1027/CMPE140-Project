@@ -32,11 +32,12 @@ typedef struct hashTable{// this will act as memory
 
 void hashInit(hashT* h){
     for(int i = 0; i < ELEMENTS; i++){
+        h->Table[i] = new node;//allocate memory
         nodeInit(h->Table[i]);
     }
 }
 
-void hashInsert(string address, int data, hashT* h){
+void hashInsert(string address, long data, hashT* h){
     int index = hashS(address) % ELEMENTS;
     
     while(h->Table[index]->address != "00000000"){//while this is already an entry at that location
@@ -54,8 +55,6 @@ int hashPull(string address, hashT* h){
     return h->Table[index]->data;
 }
 
-hashT h;//global hashTable
-
 string bin2str(int bin){
     string binary; 
     int bits = 32;
@@ -66,6 +65,8 @@ string bin2str(int bin){
 
     return binary;
 }
+
+hashT h;
 
 void Instructions(vector<string> *instr, string fileName){
     ifstream in(fileName);//open chosen file
@@ -215,6 +216,7 @@ void lType(string instruction){
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         byte = bin2str(data);//convert to a string
+        cout << "checking lb" << endl;
         t[r2] = stol(byte.substr(byte.length()-9, 8), nullptr, 2);//convert the last 8 bits to int
     }
     else if(funct3 == "001"){//lh
@@ -225,6 +227,7 @@ void lType(string instruction){
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         half = bin2str(data);//convert to a string
+        cout << "checking lh" << endl;
         t[r2] = stol(half.substr(half.length()-17, 16), nullptr, 2);//convert the last 8 bits to int
     }
     else if(funct3 == "010"){//lw
@@ -235,7 +238,9 @@ void lType(string instruction){
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         word = bin2str(data);//convert to a string
-        t[r2] = stol(word, nullptr, 2);//convert the last 8 bits to int
+        cout << "checking lw" << endl;
+        t[r2] = data;//convert the last 8 bits to int
+        //cout << "put in data" << endl;
     }
     else if(funct3 == "100"){//lbu
         string address;
@@ -245,6 +250,7 @@ void lType(string instruction){
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         byte = bin2str(data);//convert to a string
+        cout << "checking lbu" << endl;
         t[r2] = (unsigned long)stol(byte.substr(byte.length()-9, 8), nullptr, 2);//convert the last 8 bits to int
         
     }
@@ -256,6 +262,7 @@ void lType(string instruction){
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         half = bin2str(data);//convert to a string
+        cout << "checking lhu" << endl;
         t[r2] = (unsigned long)stol(half.substr(half.length()-17, 16), nullptr, 2);//convert the last 8 bits to int
     }
 }
@@ -289,6 +296,7 @@ void sType(string instruction){
         address = bin2str(add);//convert to a string
         long store = t[r2] + data2;
         byte = bin2str(store);
+        cout << "checking sb" << endl;
         hashInsert(address, stol(byte.substr(byte.length()-9, 8), nullptr, 2), &h);//puts the data to that address
     }
     else if(funct3 == "001"){//sh - 16 bits
@@ -298,7 +306,8 @@ void sType(string instruction){
         address = bin2str(add);//convert to a string
         long store = t[r2] + data2;
         byte = bin2str(store);
-        hashInsert(address, stol(byte.substr(byte.length()-17, 16), nullptr, 2), &h);//puts the data to that address
+        cout << "check for sh" << endl;
+        hashInsert(address, stoi(byte.substr(byte.length()-17, 16), nullptr, 2), &h);//puts the data to that address
     }
     else if(funct3 == "010"){//sw - 32 bits
         string address;
@@ -307,7 +316,8 @@ void sType(string instruction){
         address = bin2str(add);//convert to a string
         long store = t[r2] + data2;
         byte = bin2str(store);
-        hashInsert(address, stol(byte, nullptr, 2), &h);//puts the data to that address
+        cout << "checking sw" << endl;
+        hashInsert(address, store, &h);//puts the data to that address
     }
     
 }
@@ -339,6 +349,9 @@ int main() {
     //cout << "input a file name" << endl;
     //cin >> file;
     //cout << file << endl;
+
+    hashInit(&h);
+
     Instructions(&instr, file);
     for(int i = 0; i < 32; i++){//initialize the registers
         t[i] = 0; 
@@ -351,7 +364,10 @@ int main() {
             cout << "register (" << j << ") : " << t[j] << endl;
         }
         cout << endl << endl;
+
     }
+
+    cout << "finished instructions" << endl;
 
     return 0;
 }
