@@ -283,22 +283,31 @@ void sType(string instruction){
     }
 
     if(funct3 == "000"){//sb - 8 bits
-        int store;
         string address;
-        address = t[r1] + data1;
-        store = t[r2] + data2;
+        string byte;
+        int add = t[r1] + data1;//get address
+        address = bin2str(add);//convert to a string
+        int store = t[r2] + data2;
+        byte = bin2str(store);
+        hashInsert(address, stoi(byte.substr(byte.length()-8, 8), nullptr, 2), &h);//puts the data to that address
     }
     else if(funct3 == "001"){//sh - 16 bits
-        int store;
         string address;
-        address = t[r1] + data1;
-        store = t[r2] + data2;
+        string byte;
+        int add = t[r1] + data1;//get address
+        address = bin2str(add);//convert to a string
+        int store = t[r2] + data2;
+        byte = bin2str(store);
+        hashInsert(address, stoi(byte.substr(byte.length()-16, 16), nullptr, 2), &h);//puts the data to that address
     }
     else if(funct3 == "010"){//sw - 32 bits
-        int store;
         string address;
-        address = t[r1] + data1;
-        store = t[r2] + data2;
+        string byte;
+        int add = t[r1] + data1;//get address
+        address = bin2str(add);//convert to a string
+        int store = t[r2] + data2;
+        byte = bin2str(store);
+        hashInsert(address, stoi(byte, nullptr, 2), &h);//puts the data to that address
     }
     
 }
