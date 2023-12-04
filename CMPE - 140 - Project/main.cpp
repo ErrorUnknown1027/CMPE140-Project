@@ -401,6 +401,7 @@ int main() {
         cout << endl << endl;
 
         cout << "register t(1) : " << t[5] << endl;
+        cout << "register t(2) : " << t[6] << endl; 
 
     }
 
