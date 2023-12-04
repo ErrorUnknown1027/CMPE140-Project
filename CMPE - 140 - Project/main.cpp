@@ -7,11 +7,11 @@
 
 using namespace std;
 
-int t[32];//global array of registers
+long t[32];//global array of registers
 
 typedef struct node{
     string address;//binary address from the instruction
-    int data;//data to be stored
+    long data;//data to be stored
 }node;
 
 void nodeInit(node *n){
@@ -99,7 +99,7 @@ void iType(string instruction){
     rs1 = instruction.substr(12,5);//5 bits
     rd = instruction.substr(20,5);// 5 bits
 
-    int r1, r2, data;
+    long r1, r2, data;
     r1 = stoi(rs1, nullptr, 2);// convert to int
     r2 = stoi(rd, nullptr, 2);//convert to int
     data = stoi(immed, nullptr, 2);//convert to int
@@ -114,7 +114,7 @@ void iType(string instruction){
         t[r2] = (t[r1] < data) ? 1 : 0;
     }
     else if(funct3 == "011"){//sltiu
-        t[r2] = ((unsigned int)t[r1] < (unsigned int)data) ? 1 : 0;
+        t[r2] = ((unsigned long)t[r1] < (unsigned long)data) ? 1 : 0;
     }
     else if(funct3 == "100"){//xori
         t[r2] = t[r1] ^ data;
@@ -133,7 +133,7 @@ void iType(string instruction){
             t[r2] = t[r1] >> data;
         }
         else{//srli
-            t[r2] = (unsigned int)t[r1] >> data;
+            t[r2] = (unsigned long)t[r1] >> data;
         }
     }
     
@@ -148,10 +148,10 @@ void rType(string instruction){
     rs2 = instruction.substr(7,5);// 5 bits
     rd = instruction.substr(20,5);// 5 bits
 
-    int r1, r2, r3, data;
-    r1 = stoi(rs1, nullptr, 2);// convert to int
-    r2 = stoi(rd, nullptr, 2);// convert to int
-    r3 = stoi(rs2, nullptr, 2);// convert to int
+    long r1, r2, r3, data;
+    r1 = stol(rs1, nullptr, 2);// convert to int
+    r2 = stol(rd, nullptr, 2);// convert to int
+    r3 = stol(rs2, nullptr, 2);// convert to int
     //we dont convert the immed to an int since we aren't using it for any calcualtions
 
     if(funct3 == "000"){//add and sub
@@ -169,14 +169,14 @@ void rType(string instruction){
         t[r2] = (t[r1] < t[r3]) ? 1 : 0;
     }
     else if(funct3 == "011"){//sltu
-        t[r2] = ((unsigned int)t[r1] < (unsigned int)t[r3]) ? 1 : 0;
+        t[r2] = ((unsigned long)t[r1] < (unsigned long)t[r3]) ? 1 : 0;
     }
     else if(funct3 == "100"){//xor
         t[r2] = t[r1] ^ t[r3];
     }
     else if(funct3 == "101"){//srl and sra
         if(immed == "0000000"){//srl
-            t[r2] = (unsigned int)t[r1] >> (unsigned int)t[r3];
+            t[r2] = (unsigned long)t[r1] >> (unsigned long)t[r3];
         }
         else if(immed == "0100000"){//sra
             t[r2] = t[r1] >> t[r3];
@@ -198,10 +198,10 @@ void lType(string instruction){
     rs1 = instruction.substr(12,5);// 5 bits
     rd = instruction.substr(20,5);// 5 bits
 
-    int r1, r2, data1;
-    r1 = stoi(rs1, nullptr, 2);
-    r2 = stoi(rd, nullptr, 2);
-    data1 = stoi(immed, nullptr, 2);
+    long r1, r2, data1;
+    r1 = stol(rs1, nullptr, 2);
+    r2 = stol(rd, nullptr, 2);
+    data1 = stol(immed, nullptr, 2);
 
     if(immed[0] == '1'){//check if the number is negative in binary
         data1 = data1 - pow(2, immed.length());//sub from the largest possible negative number
@@ -210,53 +210,53 @@ void lType(string instruction){
     if(funct3 == "000"){//lb
         string address;
         string byte;
-        int data;
-        int add = t[r1] + data1;//get address
+        long data;
+        long add = t[r1] + data1;//get address
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         byte = bin2str(data);//convert to a string
-        t[r2] = stoi(byte.substr(byte.length()-8, 8), nullptr, 2);//convert the last 8 bits to int
+        t[r2] = stol(byte.substr(byte.length()-9, 8), nullptr, 2);//convert the last 8 bits to int
     }
     else if(funct3 == "001"){//lh
         string address;
         string half;
-        int data;
-        int add = t[r1] + data1;//get address
+        long data;
+        long add = t[r1] + data1;//get address
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         half = bin2str(data);//convert to a string
-        t[r2] = stoi(half.substr(half.length()-16, 16), nullptr, 2);//convert the last 8 bits to int
+        t[r2] = stol(half.substr(half.length()-17, 16), nullptr, 2);//convert the last 8 bits to int
     }
     else if(funct3 == "010"){//lw
         string address;
         string word;
-        int data;
-        int add = t[r1] + data1;//get address
+        long data;
+        long add = t[r1] + data1;//get address
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         word = bin2str(data);//convert to a string
-        t[r2] = stoi(word, nullptr, 2);//convert the last 8 bits to int
+        t[r2] = stol(word, nullptr, 2);//convert the last 8 bits to int
     }
     else if(funct3 == "100"){//lbu
         string address;
         string byte;
-        int data;
-        int add = t[r1] + data1;//get address
+        long data;
+        long add = t[r1] + data1;//get address
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         byte = bin2str(data);//convert to a string
-        t[r2] = (unsigned int)stoi(byte.substr(byte.length()-8, 8), nullptr, 2);//convert the last 8 bits to int
+        t[r2] = (unsigned long)stol(byte.substr(byte.length()-9, 8), nullptr, 2);//convert the last 8 bits to int
         
     }
     else if(funct3 == "101"){//lhu
         string address;
         string half;
-        int data;
-        int add = t[r1] + data1;//get address
+        long data;
+        long add = t[r1] + data1;//get address
         address = bin2str(add);//convert to a string
         data = hashPull(address, &h);//pulls the data from that address
         half = bin2str(data);//convert to a string
-        t[r2] = (unsigned int)stoi(half.substr(half.length()-16, 16), nullptr, 2);//convert the last 8 bits to int
+        t[r2] = (unsigned long)stol(half.substr(half.length()-17, 16), nullptr, 2);//convert the last 8 bits to int
     }
 }
 
@@ -269,11 +269,11 @@ void sType(string instruction){
     rs1 = instruction.substr(12,5);// 5 bits
     rs2 = instruction.substr(7,5);// 5 bits
 
-    int r1, r2, data1, data2;
-    r1 = stoi(rs1, nullptr, 2);
-    r2 = stoi(rs2, nullptr, 2);
-    data1 = stoi(immed1, nullptr, 2);
-    data2 = stoi(immed2, nullptr, 2);
+    long r1, r2, data1, data2;
+    r1 = stol(rs1, nullptr, 2);
+    r2 = stol(rs2, nullptr, 2);
+    data1 = stol(immed1, nullptr, 2);
+    data2 = stol(immed2, nullptr, 2);
 
     if(immed1[0] == '1'){//check if the number is negative in binary
         data1 = data1 - pow(2, immed1.length());//sub from the largest possible negative number
@@ -285,29 +285,29 @@ void sType(string instruction){
     if(funct3 == "000"){//sb - 8 bits
         string address;
         string byte;
-        int add = t[r1] + data1;//get address
+        long add = t[r1] + data1;//get address
         address = bin2str(add);//convert to a string
-        int store = t[r2] + data2;
+        long store = t[r2] + data2;
         byte = bin2str(store);
-        hashInsert(address, stoi(byte.substr(byte.length()-8, 8), nullptr, 2), &h);//puts the data to that address
+        hashInsert(address, stol(byte.substr(byte.length()-9, 8), nullptr, 2), &h);//puts the data to that address
     }
     else if(funct3 == "001"){//sh - 16 bits
         string address;
         string byte;
-        int add = t[r1] + data1;//get address
+        long add = t[r1] + data1;//get address
         address = bin2str(add);//convert to a string
-        int store = t[r2] + data2;
+        long store = t[r2] + data2;
         byte = bin2str(store);
-        hashInsert(address, stoi(byte.substr(byte.length()-16, 16), nullptr, 2), &h);//puts the data to that address
+        hashInsert(address, stol(byte.substr(byte.length()-17, 16), nullptr, 2), &h);//puts the data to that address
     }
     else if(funct3 == "010"){//sw - 32 bits
         string address;
         string byte;
-        int add = t[r1] + data1;//get address
+        long add = t[r1] + data1;//get address
         address = bin2str(add);//convert to a string
-        int store = t[r2] + data2;
+        long store = t[r2] + data2;
         byte = bin2str(store);
-        hashInsert(address, stoi(byte, nullptr, 2), &h);//puts the data to that address
+        hashInsert(address, stol(byte, nullptr, 2), &h);//puts the data to that address
     }
     
 }
