@@ -358,7 +358,18 @@ void sType(string instruction){
 }
 
 void bType(string instruction){
+    string funct3, rs1, rs2, rd, immed1, immed2;
+    //decode
+    immed1 = instruction.substr(0,7);// 7 bits
+    immed2 = instruction.substr(20,5);// 5 bits
+    funct3 = instruction.substr(17,3);// 3 bits
+    rs1 = instruction.substr(12,5);// 5 bits
+    rs2 = instruction.substr(7,5);// 5 bits
+    rd = instruction.substr(20, 5);// 5 bits
 
+    if(funct3 == "000"){//beq
+        if()
+    }
 }
 
 void decode(string instruction){
@@ -394,6 +405,7 @@ void printReg(){
 int main() {
     string file = "ldst.dat";
     vector<string> instr;
+    string command;
     //cout << "input a file name" << endl;
     //cin >> file;
     //cout << file << endl;
@@ -401,16 +413,26 @@ int main() {
     hashInit(&h);
 
     Instructions(&instr, file);
+    cout << "Instructions loaded" << endl;
+    cout << "input command" << endl;
+    cin >> command;
 
     for(int i = 0; i < 32; i++){//initialize the registers
         t[i] = 0; 
     }
 
-    for(int i = 0; i < instr.size(); i++){
-        cout << "instruction #" << i+1 << "/" << instr.size() << endl;
-        decode(instr[i]);
+    while(1){
+        if(command == "r"){
+            for(int i = 0; i < instr.size(); i++){
+            cout << "instruction #" << i+1 << "/" << instr.size() << endl;
+            decode(instr[i]);
 
-        printReg();
+            printReg();
+            }
+
+            break;
+        }
+        if(command )
     }
 
     cout << "finished instructions" << endl;
