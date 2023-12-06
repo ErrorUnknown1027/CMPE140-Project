@@ -366,10 +366,6 @@ void bType(string instruction){
     rs1 = instruction.substr(12,5);// 5 bits
     rs2 = instruction.substr(7,5);// 5 bits
     rd = instruction.substr(20, 5);// 5 bits
-
-    if(funct3 == "000"){//beq
-        if()
-    }
 }
 
 void decode(string instruction){
@@ -403,7 +399,7 @@ void printReg(){
 }
 
 int main() {
-    string file = "ldst.dat";
+    string file = "line.dat";
     vector<string> instr;
     string command;
     //cout << "input a file name" << endl;
@@ -414,14 +410,15 @@ int main() {
 
     Instructions(&instr, file);
     cout << "Instructions loaded" << endl;
-    cout << "input command" << endl;
-    cin >> command;
 
     for(int i = 0; i < 32; i++){//initialize the registers
         t[i] = 0; 
     }
 
+    int count = 1;
     while(1){
+        cout << "input command" << endl;
+        cin >> command;
         if(command == "r"){
             for(int i = 0; i < instr.size(); i++){
             cout << "instruction #" << i+1 << "/" << instr.size() << endl;
@@ -432,7 +429,16 @@ int main() {
 
             break;
         }
-        if(command )
+        if(command == "s"){
+            cout << "instruction : " << endl << instr[count -1] << endl;
+            cout << "instruction # " << count << "/" << instr.size() << endl;
+            decode(instr[count - 1]);
+            printReg();
+            count++;
+        }
+        if(count > instr.size()){
+            break;
+        }
     }
 
     cout << "finished instructions" << endl;
