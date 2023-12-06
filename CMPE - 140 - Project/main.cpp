@@ -92,15 +92,15 @@ void Instructions(vector<string> *instr, string fileName){
     }
 
     string line, temp;
-    int count = 0;//counter
+    int bits = 0;
 
     while(getline(in, line)){
-        if(count < 4){//if less than 4 line pulls
-            count++;//increment
+        if(bits < 32){//if less than 4 line pulls
+            bits += line.length();
             temp = line + temp;//add new 8 bits to the full instruction
         }
-        if(count == 4){//at 4 pulls
-            count = 0;//reset counter
+        if(temp.length() == 32){//at 4 pulls
+            bits = 0;//reset counter
             instr->push_back(temp);//add full instruction to the front of the vector
             temp.clear();//clear the string
         }
@@ -355,6 +355,10 @@ void sType(string instruction){
         hashInsert(address, store, &h);//puts the data to that address
     }
     
+}
+
+void bType(string instruction){
+
 }
 
 void decode(string instruction){
