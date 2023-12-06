@@ -366,6 +366,17 @@ void bType(string instruction){
     rs1 = instruction.substr(12,5);// 5 bits
     rs2 = instruction.substr(7,5);// 5 bits
     rd = instruction.substr(20, 5);// 5 bits
+
+    //convert to long
+    long r1, r2;
+    r1 = stol(rs1, nullptr, 2);
+    r2 = stol(rs2, nullptr, 2);
+
+    if(funct3 == "000"){//beq
+        if(t[r1] == t[r2]){
+            
+        }
+    }
 }
 
 void decode(string instruction){
