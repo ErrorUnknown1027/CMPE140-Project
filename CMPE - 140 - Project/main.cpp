@@ -67,7 +67,7 @@ long hashPull(string address, hashT* h){
             //goto label;
         }
     }
-    label: cout << "out of while loop" << endl;
+    cout << "out of while loop" << endl;
     return h->Table[index]->data;
 }
 
@@ -120,6 +120,7 @@ void iType(string instruction){
     r1 = stol(rs1, nullptr, 2);// convert to int
     r2 = stol(rd, nullptr, 2);//convert to int
     data = stol(immed, nullptr, 2);//convert to int
+    
     if(immed[0] == '1'){//check if the number is negative in binary
         data = data - pow(2, immed.length());//sub from the largest possible negative number
     }
@@ -377,6 +378,15 @@ void decode(string instruction){
     }
 }
 
+void printReg(){
+    cout << "register t(0) : " << t[5] << endl;
+    cout << "register t(1) : " << t[6] << endl;
+    cout << "register t(2) : " << t[7] << endl;
+    cout << "register t(3) : " << t[28] << endl;
+    cout << "register t(4) : " << t[29] << endl;
+    cout << "register t(5) : " << t[30] << endl << endl << endl;
+}
+
 int main() {
     string file = "ldst.dat";
     vector<string> instr;
@@ -387,6 +397,7 @@ int main() {
     hashInit(&h);
 
     Instructions(&instr, file);
+
     for(int i = 0; i < 32; i++){//initialize the registers
         t[i] = 0; 
     }
@@ -395,14 +406,7 @@ int main() {
         cout << "instruction #" << i+1 << "/" << instr.size() << endl;
         decode(instr[i]);
 
-        for(int j = 0; j < 32; j++){
-            cout << "register (" << j << ") : " << t[j] << endl;
-        }
-        cout << endl << endl;
-
-        cout << "register t(1) : " << t[5] << endl;
-        cout << "register t(2) : " << t[6] << endl; 
-
+        printReg();
     }
 
     cout << "finished instructions" << endl;
