@@ -8,8 +8,37 @@
 using namespace std;
 
 int t[32];//global array of registers
+long pc;
 
-void Instructions(vector<string> *instr, string fileName){
+typedef struct instr{
+    string instruction;//holds 32 bits of the instruction
+    string address;//holds the address in a string form
+}instr;
+
+void instrInit(instr *i){
+    i->address = "0";
+    i->instruction = "0";
+}
+
+string bin2str(long bin){//converts any long into a 32 bit string
+    string binary; 
+    int bits = 32;
+    for(int i = bits -1; i >= 0; i--){
+        int bit = (bin >> i) & 1;
+        binary += (bit + '0');
+    }
+
+    return binary;
+}
+
+string signExtend(string bits){//sign extends any string of bits into a 32 bit string
+    while(bits.length() < 32){
+        bits = bits[0] + bits;
+    }
+    return bits;
+}
+
+void loadInstr(vector<instr> *rom, string fileName){
     ifstream in(fileName);
     //in.open(fileName);//open file
     if(!in){
@@ -18,18 +47,18 @@ void Instructions(vector<string> *instr, string fileName){
     }
 
     string line, temp;
-    int count = 0;
+    instr* t = new instr;
 
     while(getline(in, line)){
-        if(count < 4){
-            count++;
+        if(temp.length() < 32){
             temp = line + temp;
         }
-        if(count == 4){
-            count = 0;
-            instr->push_back(temp);
-            //cout << temp << " bit count : " << temp.length() << endl;
+        if(temp.length() == 32){
+            t->address = bin2str(pc);
+            t->instruction = temp;
             temp.clear();
+            pc += 4;
+            rom->push_back(*t);
         }
     }
 
@@ -159,31 +188,68 @@ void decode(string instruction){
     }
 }
 
+void printCommands(){
+    cout << "'r' runs the entire program in one go till it hits a breakpoint or exits" << endl;
+    cout << "'s' runs the next instruction and then stops and waits for next command" << endl;
+    cout << "'x0' to 'x31' return the contents of the register from the register file" << endl;
+    cout << "Enter an address that starts with '0x' " << endl;
+    cout << "'pc' returns the value fo the PC" << endl << endl; 
+}
+
+void printReg(){
+    cout << "register t(0) : " << t[5] << endl;
+    cout << "register t(1) : " << t[6] << endl;
+    cout << "register t(2) : " << t[7] << endl;
+    cout << "register t(3) : " << t[28] << endl;
+    cout << "register t(4) : " << t[29] << endl;
+    cout << "register t(5) : " << t[30] << endl << endl << endl;
+}
+
 int main() {
     string file = "r_type.dat";
-    vector<string> instr;
-    //cout << "input a file name" << endl;
-    //cin >> file;
-    //cout << file << endl;
-    Instructions(&instr, file);
+    vector<instr> rom;
+    pc = 0;
+    loadInstr(&rom, file);
     for(int i = 0; i < 32; i++){//initialize the registers
         t[i] = 0; 
     }
-    
-    // for(int i = 0; i < instr.size(); i++){
-    //     cout << instr[i] << " bits count : " << instr[i].length() << endl;
+
+    // for(int i = 0; i < rom.size(); i++){
+    //     cout << "Instruction : " << rom[i].instruction << endl;
+    //     cout << "At address : " << rom[i].address << "(" << stol(rom[i].address, nullptr, 2) << ")" << endl << endl;
     // }
 
-    //cout << endl << endl;
+    string command;
 
-    for(int i = 0; i < instr.size(); i++){
-        decode(instr[i]);
+    //reset pc for instructions
+    pc = 0;
+    int count = 1;
+    while(1){
+        printCommands();
+        cin >> command;
 
-        for(int j = 0; j < 32; j++){
-            cout << "register (" << j << ") : " << t[j] << endl;
+        if(command == "r"){
+            for(int i = 0; i < rom.size(); i++){
+            cout << "instruction : " << rom[count -1].instruction << endl;
+            cout << "instruction #" << i+1 << "/" << rom.size() << endl;
+            decode(rom[i].instruction);
+            pc += 4;
+            printReg();
+            }
+            break;
         }
-        cout << endl << endl;
+        if(command == "s"){
+            cout << "instruction : " << rom[count -1].instruction << endl;
+            cout << "instruction # " << count << "/" << rom.size() << endl;
+            decode(rom[count - 1].instruction);
+            printReg();
+            count++;
+            pc += 4;
+        }
+        if(count > rom.size()){
+            break;
+        }
     }
-
+    
     return 0;
 }
