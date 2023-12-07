@@ -9,12 +9,13 @@ using namespace std;
 
 int t[32];//global array of registers
 long pc;
-vector<instr> rom;//instruction memory
 
 typedef struct instr{
     string instruction;//holds 32 bits of the instruction
     string address;//holds the address in a string form
 }instr;
+
+vector<instr> rom;//instruction memory
 
 void instrInit(instr *i){
     i->address = "0";
@@ -515,46 +516,6 @@ void AUIPC(string instruction){
 
 }
 
-
-/* for JAL - chatgpt
-Concatenate the bits imm[20], imm[10:1], imm[11], and imm[19:12] to form a 20-bit immediate value.
-Sign-extend the 20-bit immediate value to 32 bits.
-Add the sign-extended immediate value to the current PC (program counter) to compute the target address.
-Store the address of the next instruction (PC + 4) in the destination register rd.
-Update the PC to jump to the target address.
- */
-void JAL(string instruction){
-    cout << instruction << endl;
-    string immed1, immed2, immed3, immed4, fullImmed, rd;
-    immed1 = instruction.substr(11,1);// 1bits signed bit
-    immed2 = instruction.substr(1,10);// 10bits immed[10:1]
-    immed3 = instruction.substr(20,1);// 1bits immed[11]
-    immed4 = instruction.substr(12,8);// 7bits immed[19:12]
-    fullImmed = immed1 + immed2 + immed3 + immed4;
-    string temp = signExtend(fullImmed);//sign extend to 32 bits\
-    //temp is the offset of the target address
-    //rd is the return address
-    rd = instruction.substr(20,5);// 5 bits for destination
-
-    long data = stol(fullImmed, nullptr, 2);
-    long data_rd = stol(rd, nullptr, 2);
-    if(fullImmed[0] == '1'){//check if the number is negative in binary
-        data = data - pow(2, fullImmed.length());//sub from the largest possible negative number
-    }
-    t[data_rd] = pc + 4;//this is to store the return address
-    pc += data; // we then jump to the target address
-
-    //run the instruction we are jumping to
-    cout << "instruction : " << rom[pc/4].instruction << endl;
-    cout << "instruction #" << pc/4 << "/" << rom.size() << endl;
-    decode(rom[pc/4].instruction);
-    printReg(); 
-
-    //return to the original instruction
-    pc = t[data_rd];   
-}
-
-
 /* for jalr (from chatgpt)
 Concatenate the bits imm[11:0] and rs1 to form a 12-bit immediate value.
 Sign-extend the 12-bit immediate value to 32 bits.
@@ -583,6 +544,8 @@ void JALR(string instruction){
     }
 
 }
+
+void JAL(string instruction);//function declaration
 
 void decode(string instruction){
     //find opcode
@@ -618,7 +581,7 @@ void decode(string instruction){
         cout << "auipc instruction" << endl;
         AUIPC(instruction);
     }
-    else if(opcode == "110111"){//jal instruction
+    else if(opcode == "1101111"){//jal instruction
         cout << "jal instruction" << endl;
         JAL(instruction);
     }
@@ -709,4 +672,42 @@ int main() {
         }
     }
     return 0;
+}
+
+/* for JAL - chatgpt
+Concatenate the bits imm[20], imm[10:1], imm[11], and imm[19:12] to form a 20-bit immediate value.
+Sign-extend the 20-bit immediate value to 32 bits.
+Add the sign-extended immediate value to the current PC (program counter) to compute the target address.
+Store the address of the next instruction (PC + 4) in the destination register rd.
+Update the PC to jump to the target address.
+ */
+void JAL(string instruction){
+    cout << instruction << endl;
+    string immed1, immed2, immed3, immed4, fullImmed, rd;
+    immed1 = instruction.substr(11,1);// 1bits signed bit
+    immed2 = instruction.substr(1,10);// 10bits immed[10:1]
+    immed3 = instruction.substr(20,1);// 1bits immed[11]
+    immed4 = instruction.substr(12,8);// 7bits immed[19:12]
+    fullImmed = immed1 + immed2 + immed3 + immed4;
+    string temp = signExtend(fullImmed);//sign extend to 32 bits\
+    //temp is the offset of the target address
+    //rd is the return address
+    rd = instruction.substr(20,5);// 5 bits for destination
+
+    long data = stol(fullImmed, nullptr, 2);
+    long data_rd = stol(rd, nullptr, 2);
+    if(fullImmed[0] == '1'){//check if the number is negative in binary
+        data = data - pow(2, fullImmed.length());//sub from the largest possible negative number
+    }
+    t[data_rd] = pc + 4;//this is to store the return address
+    pc += data << 1; // we then jump to the target address
+
+    //run the instruction we are jumping to
+    cout << "instruction : " << rom[pc/4].instruction << endl;
+    cout << "instruction #" << pc/4 << "/" << rom.size() << endl;
+    decode(rom[pc/4].instruction);
+    printReg(); 
+
+    //return to the original instruction
+    pc = t[data_rd];   
 }
