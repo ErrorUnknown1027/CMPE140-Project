@@ -473,16 +473,17 @@ void LUI(string instruction){
     string immed, rd;
     immed = instruction.substr(0, 20);// 7 bits
     string temp = signExtend(immed);
-    rd = instruction.substr(7,5);// 5 bits
+    cout << temp << endl;
+    rd = instruction.substr(20,5);// 5 bits
     long data = stol(immed, nullptr, 2);
     data = data<<12;//shifts over 12 bits (load upper immediate)
+    cout << data << endl;
     if(immed[0] == '1'){//check if the number is negative in binary
         data = data - pow(2, immed.length());//sub from the largest possible negative number
     }
     long data_rd = stol(rd, nullptr, 2);//changes
     t[data_rd] = data;//put the data into the destination reg
     pc += 4;//program counter
-
 }
 
 /*AUIPC
@@ -496,7 +497,7 @@ void AUIPC(string instruction){
     immed = instruction.substr(0, 20);// 7 bits
     string temp = signExtend(immed);
     long data = stol(temp, nullptr, 2);
-    rd = instruction.substr(7,5);// 5 bits
+    rd = instruction.substr(20,5);// 5 bits
     if(immed[0] == '1'){//check if the number is negative in binary
         data = data - pow(2, immed.length());//sub from the largest possible negative number
     }
@@ -621,12 +622,14 @@ void printReg(){
 }
 
 int main() {
-    string file = "ldst.dat";
+    string file = "line.dat";
     vector<instr> rom;
 
     pc = 0;
 
     hashInit(&h);
+
+    loadInstr(&rom, "dmem.dat");
 
     loadInstr(&rom, file);
 
