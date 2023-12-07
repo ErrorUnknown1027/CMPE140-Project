@@ -631,6 +631,16 @@ int main() {
     string addressTemp = "00010000000000010000000000000000"; //m = -3 from dat
     hashInsert(addressTemp, -3,&h);
 
+    addressTemp = "00010000000000010000000000000100"; //x = 7 from dat
+    hashInsert(addressTemp, 7,&h);
+
+    addressTemp = "00010000000000010000000000001000"; //c = 25 from dat
+    hashInsert(addressTemp, 25,&h);
+
+    //00010000000000010000000000001100
+    addressTemp = "00010000000000010000000000001100"; //y = -1 from dat
+    hashInsert(addressTemp, -1,&h);
+
     //loadInstr(&rom, "dmem.dat");
 
     loadInstr(&rom, file);
