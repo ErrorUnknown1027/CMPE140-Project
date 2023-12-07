@@ -58,8 +58,8 @@ void hashInsert(string address, long data, hashT* h){
         }
     }
 
-    cout << "index : " << index << endl;
-    cout << "address : " << address << endl;
+    // cout << "index : " << index << endl;
+    // cout << "address : " << address << endl;
 
     h->Table[index]->address = address;
     h->Table[index]->data = data;
@@ -67,18 +67,18 @@ void hashInsert(string address, long data, hashT* h){
 
 long hashPull(string address, hashT* h){
     int index  = hashS(address) % ELEMENTS;
-    cout << "index : " << index << endl;
-    cout << "in hash pull" << endl;
-    cout << "looking for address : " << address << endl;
+    // cout << "index : " << index << endl;
+    // cout << "in hash pull" << endl;
+    // cout << "looking for address : " << address << endl;
     while(h->Table[index]->address != address){
-        cout << "in while loop" << endl;
+        //cout << "in while loop" << endl;
         index++;
         if(index > ELEMENTS){
             index = 0;
             //goto label;
         }
     }
-    cout << "out of while loop" << endl;
+    //cout << "out of while loop" << endl;
     return h->Table[index]->data;
 }
 
@@ -254,30 +254,30 @@ void lType(string instruction){
          data1 = data1 - pow(2, immed.length());//sub from the largest possible negative number
     }
 
-    cout << data1 << endl;
+    //cout << data1 << endl;
     //long temp = data >> t[r1];
-    cout << (t[r1] << data1) << endl;
+    //cout << (t[r1] << data1) << endl;
 
     //00010000000000010000000000001100
     //10000000000010000000000001100000
     //00000010000000000010000000000001
     if(funct3 == "000"){//lb
-        cout << "checking lb" << endl;
+        //cout << "checking lb" << endl;
         string address;
         string byte;
         long data;
         long add = t[r1];//get address
-        cout << "after shift" << endl;
+        //cout << "after shift" << endl;
         address = bin2str(add);//convert to a string
-        cout << address << endl;
+        //cout << address << endl;
         data = hashPull(address, &h);//pulls the data from that address
         byte = bin2str(data);//convert to a string
-        cout << byte << endl;
+        //cout << byte << endl;
         t[r2] = stol(byte.substr(byte.length()-9, 8), nullptr, 2);//convert the last 8 bits to int
-        cout << (t[r2] >> data1) << endl;
+        //cout << (t[r2] >> data1) << endl;
     }
     else if(funct3 == "001"){//lh
-        cout << "checking lh" << endl;
+        //cout << "checking lh" << endl;
         string address;
         string half;
         long data;
@@ -288,23 +288,23 @@ void lType(string instruction){
         t[r2] = stol(half.substr(half.length()-17, 16), nullptr, 2);//convert the last 8 bits to int
     }
     else if(funct3 == "010"){//lw
-        cout << "in lw" << endl;
+        //cout << "in lw" << endl;
         string address;
         string word;
         long data;
         long add = t[r1] + data1;//get address
-        cout << "got address" << endl;
+        //cout << "got address" << endl;
         address = bin2str(add);//convert to a string
-        cout << "got address : " << address << "lenght in bits : " << address.length() << endl; 
+        //cout << "got address : " << address << "lenght in bits : " << address.length() << endl; 
         data = hashPull(address, &h);//pulls the data from that address
-        cout << "after pull" << endl;
+        //cout << "after pull" << endl;
         word = bin2str(data);//convert to a string
-        cout << "checking lw" << endl;
+        //cout << "checking lw" << endl;
         t[r2] = data;//convert the last 8 bits to int
         //cout << "put in data" << endl;
     }
     else if(funct3 == "100"){//lbu
-        cout << "checking lbu" << endl;
+        //cout << "checking lbu" << endl;
         string address;
         string byte;
         long data;
@@ -316,7 +316,7 @@ void lType(string instruction){
         
     }
     else if(funct3 == "101"){//lhu
-        cout << "checking lhu" << endl;
+        //cout << "checking lhu" << endl;
         string address;
         string half;
         long data;
@@ -350,7 +350,7 @@ void sType(string instruction){
         data2 = data2 - pow(2, immed2.length());//sub from the largest possible negative number
     }
 
-    cout << "ADDRESS OFFSET : " << data2 << endl;
+    //cout << "ADDRESS OFFSET : " << data2 << endl;
     
     if(funct3 == "000"){//sb - 8 bits
         string address;
@@ -359,7 +359,7 @@ void sType(string instruction){
         address = bin2str(add);//convert to a string
         long store = t[r2] + data1;
         byte = bin2str(store);
-        cout << "checking sb" << endl;
+        //cout << "checking sb" << endl;
         hashInsert(address, stol(byte.substr(byte.length()-9, 8), nullptr, 2), &h);//puts the data to that address
     }
     else if(funct3 == "001"){//sh - 16 bits
@@ -369,7 +369,7 @@ void sType(string instruction){
         address = bin2str(add);//convert to a string
         long store = t[r2] + data1;
         byte = bin2str(store);
-        cout << "check for sh" << endl;
+        //cout << "check for sh" << endl;
         hashInsert(address, stol(byte.substr(byte.length()-17, 16), nullptr, 2), &h);//puts the data to that address
     }
     else if(funct3 == "010"){//sw - 32 bits
@@ -377,10 +377,10 @@ void sType(string instruction){
         string byte;
         long add = t[r1] + data2;//get address
         address = bin2str(add);//convert to a string
-        cout << "SW ADDRESS : " << address << endl;
+        //cout << "SW ADDRESS : " << address << endl;
         long store = t[r2] + data1;
         byte = bin2str(store);
-        cout << "checking sw" << endl;
+        //cout << "checking sw" << endl;
         hashInsert(address, store, &h);//puts the data to that address
     }
     
@@ -473,11 +473,11 @@ void LUI(string instruction){
     string immed, rd;
     immed = instruction.substr(0, 20);// 7 bits
     string temp = signExtend(immed);
-    cout << temp << endl;
+    //cout << temp << endl;
     rd = instruction.substr(20,5);// 5 bits
     long data = stol(immed, nullptr, 2);
     data = data<<12;//shifts over 12 bits (load upper immediate)
-    cout << data << endl;
+    //cout << data << endl;
     if(immed[0] == '1'){//check if the number is negative in binary
         data = data - pow(2, immed.length());//sub from the largest possible negative number
     }
@@ -525,7 +525,7 @@ void JAL(string instruction){
     immed4 = instruction.substr(12,8);// 7bits immed[19:12]
     fullImmed = immed1 + immed2 + immed3 + immed4;
     string temp = signExtend(fullImmed);
-    rd = instruction.substr(7,5);// 5 bits for destination
+    rd = instruction.substr(20,5);// 5 bits for destination
     long data = stol(fullImmed, nullptr, 2);
     long data_rd = stol(rd, nullptr, 2);
     if(fullImmed[0] == '1'){//check if the number is negative in binary
@@ -553,7 +553,7 @@ void JALR(string instruction){
     funct3 = instruction.substr(12,3);// 3 bit
     rs1 = instruction.substr(15, 5);//5 bits
     string temp = signExtend(immed);
-    rd = instruction.substr(7,5);// 5 bits
+    rd = instruction.substr(20,5);// 5 bits
     long data = stol(immed, nullptr, 2);
     long data_rd = stol(rd, nullptr, 2);
     long data_rs1 = stol(rs1, nullptr, 2);
