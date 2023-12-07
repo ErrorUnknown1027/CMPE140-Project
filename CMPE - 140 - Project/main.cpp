@@ -664,21 +664,19 @@ int main() {
         cin >> command;
         if(command == "r"){
             for(int i = 0; i < rom.size(); i++){
-            cout << "instruction : " << rom[count -1].instruction << endl;
+            cout << "instruction : " << rom[pc/4].instruction << endl;
             cout << "instruction #" << i+1 << "/" << rom.size() << endl;
-            decode(rom[i].instruction);
-            pc += 4;
+            decode(rom[pc/4].instruction);
             printReg();
             }
             break;
         }
         if(command == "s"){
-            cout << "instruction : " << rom[count -1].instruction << endl;
+            cout << "instruction : " << rom[pc/4].instruction << endl;
             cout << "instruction # " << count << "/" << rom.size() << endl;
-            decode(rom[count - 1].instruction);
+            decode(rom[pc/4].instruction);
             printReg();
             count++;
-            pc += 4;
         }
         if(count > rom.size()){
             break;
