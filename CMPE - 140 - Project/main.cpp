@@ -436,9 +436,8 @@ int main() {
     string file = "line.dat";
     vector<string> instr;
     string command;
-    //cout << "input a file name" << endl;
-    //cin >> file;
-    //cout << file << endl;
+    
+    long pc = 0; //start at 0x00000000
 
     hashInit(&h);
 
@@ -457,10 +456,9 @@ int main() {
             for(int i = 0; i < instr.size(); i++){
             cout << "instruction #" << i+1 << "/" << instr.size() << endl;
             decode(instr[i]);
-
+            pc += 4;
             printReg();
             }
-
             break;
         }
         if(command == "s"){
@@ -469,6 +467,7 @@ int main() {
             decode(instr[count - 1]);
             printReg();
             count++;
+            pc += 4;
         }
         if(count > instr.size()){
             break;
