@@ -82,6 +82,13 @@ string bin2str(int bin){
     return binary;
 }
 
+string signExtend(string bits){//sign extends any string of bits into a 32 bit string
+    while(bits.length() < 32){
+        bits = bits[0] + bits;
+    }
+    return bits;
+}
+
 hashT h;
 
 void Instructions(vector<string> *instr, string fileName){
@@ -374,8 +381,24 @@ void bType(string instruction){
 
     if(funct3 == "000"){//beq
         if(t[r1] == t[r2]){
-            
+            immed1 = signExtend(immed1 + "0");
+            //return this address
         }
+    }
+    else if(funct3 == "001"){//bne
+
+    }
+    else if(funct3 == "100"){//blt
+
+    }
+    else if(funct3 == "101"){//bge
+
+    }
+    else if(funct3 == "110"){//bltu
+
+    }
+    else if(funct3 == "111"){//bgeu
+
     }
 }
 
