@@ -394,6 +394,9 @@ void bType(string instruction){
             }
             pc = pc + data;
         }
+        else{//else move on to the next instruction
+            pc += 4;
+        }
     }
     else if(funct3 == "001"){//bne
         cout << "bne" << endl;
@@ -404,6 +407,9 @@ void bType(string instruction){
                 data = data - pow(2, immed1.length());
             }
             pc = pc + data;
+        }
+        else{//else move on to the next instruction
+            pc += 4;
         }
     }
     else if(funct3 == "100"){//blt
@@ -416,7 +422,9 @@ void bType(string instruction){
             }
             pc = pc + data;
         }
-
+        else{//else move on to the next instruction
+            pc += 4;
+        }
     }
     else if(funct3 == "101"){//bge
         cout << "bge" << endl;
@@ -427,6 +435,9 @@ void bType(string instruction){
                 data = data - pow(2, immed1.length());
             }
             pc = pc + data;
+        }
+        else{//else move on to the next instruction
+            pc += 4;
         }
     }
     else if(funct3 == "110"){//bltu
@@ -439,6 +450,9 @@ void bType(string instruction){
             }
             pc = pc + data;
         }
+        else{//else move on to the next instruction
+            pc += 4;
+        }
     }
     else if(funct3 == "111"){//bgeu
         cout << "bgeu" << endl;
@@ -449,6 +463,9 @@ void bType(string instruction){
                 data = data - pow(2, immed1.length());
             }
             pc = pc + data;
+        }
+        else{//else move on to the next instruction
+            pc += 4;
         }
     }
 }
@@ -665,7 +682,7 @@ int main() {
         if(command == "r"){
             for(int i = 0; i < rom.size(); i++){
             cout << "instruction : " << rom[pc/4].instruction << endl;
-            cout << "instruction #" << i+1 << "/" << rom.size() << endl;
+            cout << "instruction #" << pc/4 << "/" << rom.size() << endl;
             decode(rom[pc/4].instruction);
             printReg();
             }
