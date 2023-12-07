@@ -483,6 +483,9 @@ void decode(string instruction){
     else if(opcode == "0100011"){//s - type instructions
         sType(instruction);
     }
+    else if(opcode == " "){//branch - type instructions
+        bType(instruction);
+    }
 }
 
 void printCommands(){
@@ -503,7 +506,7 @@ void printReg(){
 }
 
 int main() {
-    string file = "r_type.dat";
+    string file = "ldst.dat";
     vector<instr> rom;
 
     pc = 0;
@@ -511,6 +514,7 @@ int main() {
     hashInit(&h);
 
     loadInstr(&rom, file);
+
     for(int i = 0; i < 32; i++){//initialize the registers
         t[i] = 0; 
     }
