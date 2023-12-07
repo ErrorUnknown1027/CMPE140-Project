@@ -628,8 +628,10 @@ int main() {
     pc = 0;
 
     hashInit(&h);
+    string addressTemp = "00010000000000010000000000000000"; //m = -3 from dat
+    hashInsert(addressTemp, -3,&h);
 
-    loadInstr(&rom, "dmem.dat");
+    //loadInstr(&rom, "dmem.dat");
 
     loadInstr(&rom, file);
 
