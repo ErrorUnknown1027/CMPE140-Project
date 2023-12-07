@@ -30,7 +30,7 @@ void nodeInit(node *n){
     n->data = 0;
 }
 
-const int ELEMENTS = 256; //2^16 - 2^32 seems like a lot of space
+const int ELEMENTS = 512; //2^16 - 2^32 seems like a lot of space
 
 int hashS(string address){
     int index = stoi(address, nullptr, 2);
@@ -50,39 +50,28 @@ void hashInit(hashT* h){
 
 void hashInsert(string address, long data, hashT* h){
     int index = hashS(address) % ELEMENTS;
-    
     while(h->Table[index]->address != "00000000"){//while this is already an entry at that location
         index++;
         if(index > ELEMENTS){
             index = 0;
         }
     }
-
-    // cout << "index : " << index << endl;
-    // cout << "address : " << address << endl;
-
     h->Table[index]->address = address;
     h->Table[index]->data = data;
 }
 
 long hashPull(string address, hashT* h){
     int index  = hashS(address) % ELEMENTS;
-    // cout << "index : " << index << endl;
-    // cout << "in hash pull" << endl;
-    // cout << "looking for address : " << address << endl;
     while(h->Table[index]->address != address){
-        //cout << "in while loop" << endl;
         index++;
         if(index > ELEMENTS){
             index = 0;
-            //goto label;
         }
     }
-    //cout << "out of while loop" << endl;
     return h->Table[index]->data;
 }
 
-hashT h;
+hashT h;// global hash table
 
 string bin2str(long bin){//converts any long into a 32 bit string
     string binary;
@@ -91,7 +80,6 @@ string bin2str(long bin){//converts any long into a 32 bit string
         int bit = (bin >> i) & 1;
         binary += (bit + '0');
     }
-
     return binary;
 }
 
@@ -104,15 +92,12 @@ string signExtend(string bits){//sign extends any string of bits into a 32 bit s
 
 void loadInstr(vector<instr> *rom, string fileName){
     ifstream in(fileName);
-    //in.open(fileName);//open file
     if(!in){
         cerr << "Failed to open file" << endl;
         return;
     }
-
     string line, temp;
     instr* t = new instr;
-
     while(getline(in, line)){
         if(temp.length() < 32){
             temp = line + temp;
@@ -125,7 +110,6 @@ void loadInstr(vector<instr> *rom, string fileName){
             rom->push_back(*t);
         }
     }
-
 }
 
 void iType(string instruction){
@@ -135,51 +119,55 @@ void iType(string instruction){
     funct3 = instruction.substr(17,3);
     rs1 = instruction.substr(12,5);
     rd = instruction.substr(20,5);
-    //cout << "opcode in decimal : " << b2int(instruction.substr(25,7)) << endl;
-
-    // cout << "funct3 : " << funct3 << endl;
-    // cout << "rs1 : " << rs1 << endl;
-    // cout << "rd : " << rd << endl;
-    // cout << "immed : " << immed << endl;
-
-    int r1, r2, data;
-    r1 = stoi(rs1, nullptr, 2);
-    r2 = stoi(rd, nullptr, 2);
-    data = stoi(immed, nullptr, 2);
+    
+    //convert to long
+    long r1, r2, data;
+    r1 = stol(rs1, nullptr, 2);
+    r2 = stol(rd, nullptr, 2);
+    data = stol(immed, nullptr, 2);
     if(immed[0] == '1'){//checking is signed
         data = data - pow(2, immed.length());
     }
 
     if(funct3 == "000"){//addi
         t[r2] = t[r1] + data;
+        cout << "addi" << endl;
     }
     else if(funct3 == "010"){//slti
         t[r2] = (t[r1] < data) ? 1 : 0;
+        cout << "slti" << endl;
     }
     else if(funct3 == "011"){//sltiu
         t[r2] = ((unsigned int)t[r1] < (unsigned int)data) ? 1 : 0;
+        cout << "sltiu" << endl;
     }
     else if(funct3 == "100"){//xori
         t[r2] = t[r1] ^ data;
+        cout << "xori" << endl;
     }
     else if(funct3 == "110"){//ori
         t[r2] = t[r1] | data;
+        cout << "ori" << endl;
     }
     else if(funct3 == "111"){//andi
         t[r2] = t[r1] & data;
+        cout << "andi" << endl;
     }
     else if(funct3 == "001"){//slli
         t[r2] = t[r1] << data;
+        cout << "slli" << endl;
     }
     else if(funct3 == "101"){//srli and srai
         if(immed[1] == '1'){//srai
             t[r2] = t[r1] >> data;
+            cout << "srai" << endl;
         }
         else{//srli
             t[r2] = (unsigned int)t[r1] >> data;
+            cout << "srli" << endl;
         }
     }
-    
+    pc += 4;
 }
 
 void rType(string instruction){
@@ -191,11 +179,12 @@ void rType(string instruction){
     rs2 = instruction.substr(7,5);
     rd = instruction.substr(20,5);
 
+    //convert to long
     int r1, r2, r3, data;
-    r1 = stoi(rs1, nullptr, 2);
-    r2 = stoi(rd, nullptr, 2);
-    r3 = stoi(rs2, nullptr, 2);
-    data = stoi(immed, nullptr, 2);
+    r1 = stol(rs1, nullptr, 2);
+    r2 = stol(rd, nullptr, 2);
+    r3 = stol(rs2, nullptr, 2);
+    data = stol(immed, nullptr, 2);
 
     if(immed[0] == '1'){//checking is signed
         data = data - pow(2, immed.length());
@@ -204,37 +193,48 @@ void rType(string instruction){
     if(funct3 == "000"){//add and sub
         if(immed == "0000000"){//add
             t[r2] = t[r1] + t[r3];
+            cout << "add" << endl;
         }
-        else if(immed == "0100000"){
+        else if(immed == "0100000"){//sub
             t[r2] = t[r1] - t[r3];
+            cout << "sub" << endl;
         }
     }
     else if(funct3 == "001"){//sll
         t[r2] = t[r1] << t[r3];
+        cout << "sll" << endl;
     }
     else if(funct3 == "010"){//slt
         t[r2] = (t[r1] < t[r3]) ? 1 : 0;
+        cout << "slt" << endl;
     }
     else if(funct3 == "011"){//sltu
-        t[r2] = ((unsigned int)t[r1] < (unsigned int)t[r3]) ? 1 : 0;
+        t[r2] = ((unsigned long)t[r1] < (unsigned long)t[r3]) ? 1 : 0;
+        cout << "sltu" << endl;
     }
     else if(funct3 == "100"){//xor
         t[r2] = t[r1] ^ t[r3];
+        cout << "xor" << endl;
     }
     else if(funct3 == "101"){//srl and sra
         if(immed == "0000000"){//srl
-            t[r2] = (unsigned int)t[r1] >> (unsigned int)t[r3];
+            t[r2] = (unsigned long)t[r1] >> (unsigned long)t[r3];
+            cout << "srl" << endl;
         }
-        else if(immed == "0100000"){
+        else if(immed == "0100000"){//sra
             t[r2] = t[r1] >> t[r3];
+            cout << "sra" << endl;
         }
     }
     else if(funct3 == "110"){//or
         t[r2] = t[r1] | t[r3];
+        cout << "or" << endl;
     }
     else if(funct3 == "111"){//and
         t[r2] = t[r1] & t[r3];
+        cout << "and" << endl;
     }
+    pc += 4;
 }
 
 void lType(string instruction){
@@ -245,6 +245,7 @@ void lType(string instruction){
     rs1 = instruction.substr(12,5);// 5 bits
     rd = instruction.substr(20,5);// 5 bits
 
+    //convert to long
     long r1, r2, data1;
     r1 = stol(rs1, nullptr, 2);
     r2 = stol(rd, nullptr, 2);
@@ -254,78 +255,62 @@ void lType(string instruction){
          data1 = data1 - pow(2, immed.length());//sub from the largest possible negative number
     }
 
-    //cout << data1 << endl;
-    //long temp = data >> t[r1];
-    //cout << (t[r1] << data1) << endl;
-
-    //00010000000000010000000000001100
-    //10000000000010000000000001100000
-    //00000010000000000010000000000001
-    if(funct3 == "000"){//lb
-        //cout << "checking lb" << endl;
-        string address;
-        string byte;
-        long data;
-        long add = t[r1];//get address
-        //cout << "after shift" << endl;
-        address = bin2str(add);//convert to a string
-        //cout << address << endl;
-        data = hashPull(address, &h);//pulls the data from that address
-        byte = bin2str(data);//convert to a string
-        //cout << byte << endl;
-        t[r2] = stol(byte.substr(byte.length()-9, 8), nullptr, 2);//convert the last 8 bits to int
-        //cout << (t[r2] >> data1) << endl;
+    if(funct3 == "000"){//lb WE DONT CARE ABOUT THIS INSTRUCTION
+        // string address;
+        // string byte;
+        // long data;
+        // long add = t[r1];//get address
+        // address = bin2str(add);//convert to a string
+        // data = hashPull(address, &h);//pulls the data from that address
+        // byte = bin2str(data);//convert to a string
+        // t[r2] = stol(byte.substr(byte.length()-9, 8), nullptr, 2);//convert the last 8 bits to int
+        cout << "lb" << endl;
     }
-    else if(funct3 == "001"){//lh
-        //cout << "checking lh" << endl;
-        string address;
-        string half;
-        long data;
-        long add = t[r1] + data1;//get address
-        address = bin2str(add);//convert to a string
-        data = hashPull(address, &h);//pulls the data from that address
-        half = bin2str(data);//convert to a string
-        t[r2] = stol(half.substr(half.length()-17, 16), nullptr, 2);//convert the last 8 bits to int
+    else if(funct3 == "001"){//lh WE DONT CARE ABOUT THIS INSTRUCTION
+        // string address;
+        // string half;
+        // long data;
+        // long add = t[r1] + data1;//get address
+        // address = bin2str(add);//convert to a string
+        // data = hashPull(address, &h);//pulls the data from that address
+        // half = bin2str(data);//convert to a string
+        // t[r2] = stol(half.substr(half.length()-17, 16), nullptr, 2);//convert the last 8 bits to int
+        cout << "lh" << endl;
     }
     else if(funct3 == "010"){//lw
-        //cout << "in lw" << endl;
         string address;
         string word;
         long data;
         long add = t[r1] + data1;//get address
-        //cout << "got address" << endl;
         address = bin2str(add);//convert to a string
-        //cout << "got address : " << address << "lenght in bits : " << address.length() << endl; 
         data = hashPull(address, &h);//pulls the data from that address
-        //cout << "after pull" << endl;
         word = bin2str(data);//convert to a string
-        //cout << "checking lw" << endl;
         t[r2] = data;//convert the last 8 bits to int
-        //cout << "put in data" << endl;
+        cout << "lw" << endl;
     }
-    else if(funct3 == "100"){//lbu
-        //cout << "checking lbu" << endl;
-        string address;
-        string byte;
-        long data;
-        long add = t[r1] + data1;//get address
-        address = bin2str(add);//convert to a string
-        data = hashPull(address, &h);//pulls the data from that address
-        byte = bin2str(data);//convert to a string
-        t[r2] = (unsigned long)stol(byte.substr(byte.length()-9, 8), nullptr, 2);//convert the last 8 bits to int
-        
+    else if(funct3 == "100"){//lbu WE DONT CARE ABOUT THIS INSTRUCTION
+        // string address;
+        // string byte;
+        // long data;
+        // long add = t[r1] + data1;//get address
+        // address = bin2str(add);//convert to a string
+        // data = hashPull(address, &h);//pulls the data from that address
+        // byte = bin2str(data);//convert to a string
+        // t[r2] = (unsigned long)stol(byte.substr(byte.length()-9, 8), nullptr, 2);//convert the last 8 bits to int
+        cout << "lbu" << endl;
     }
-    else if(funct3 == "101"){//lhu
-        //cout << "checking lhu" << endl;
-        string address;
-        string half;
-        long data;
-        long add = t[r1] + data1;//get address
-        address = bin2str(add);//convert to a string
-        data = hashPull(address, &h);//pulls the data from that address
-        half = bin2str(data);//convert to a string
-        t[r2] = (unsigned long)stol(half.substr(half.length()-17, 16), nullptr, 2);//convert the last 8 bits to int
+    else if(funct3 == "101"){//lhu WE DONT CARE ABOUT THIS INSTRUCTION
+        // string address;
+        // string half;
+        // long data;
+        // long add = t[r1] + data1;//get address
+        // address = bin2str(add);//convert to a string
+        // data = hashPull(address, &h);//pulls the data from that address
+        // half = bin2str(data);//convert to a string
+        // t[r2] = (unsigned long)stol(half.substr(half.length()-17, 16), nullptr, 2);//convert the last 8 bits to int
+        cout << "lhu" << endl;
     }
+    pc += 4;
 }
 
 void sType(string instruction){
@@ -337,6 +322,7 @@ void sType(string instruction){
     rs1 = instruction.substr(12,5);// 5 bits
     rs2 = instruction.substr(7,5);// 5 bits
 
+    //convert to long
     long r1, r2, data1, data2;
     r1 = stol(rs1, nullptr, 2);
     r2 = stol(rs2, nullptr, 2);
@@ -349,41 +335,38 @@ void sType(string instruction){
     if(immed2[0] == '1'){//check if the number is negative in binary
         data2 = data2 - pow(2, immed2.length());//sub from the largest possible negative number
     }
-
-    //cout << "ADDRESS OFFSET : " << data2 << endl;
     
-    if(funct3 == "000"){//sb - 8 bits
+    if(funct3 == "000"){//sb - 8 bits WE DONT CARE ABOUT THIS INSTRUCTION
         string address;
         string byte;
         long add = t[r1] + data2;//get address
         address = bin2str(add);//convert to a string
         long store = t[r2] + data1;
         byte = bin2str(store);
-        //cout << "checking sb" << endl;
         hashInsert(address, stol(byte.substr(byte.length()-9, 8), nullptr, 2), &h);//puts the data to that address
+        cout << "sb" << endl;
     }
-    else if(funct3 == "001"){//sh - 16 bits
+    else if(funct3 == "001"){//sh - 16 bits WE DONT CARE ABOUT THIS INSTRUCTION
         string address;
         string byte;
         long add = t[r1] + data2;//get address
         address = bin2str(add);//convert to a string
         long store = t[r2] + data1;
         byte = bin2str(store);
-        //cout << "check for sh" << endl;
         hashInsert(address, stol(byte.substr(byte.length()-17, 16), nullptr, 2), &h);//puts the data to that address
+        cout << "sh" << endl;
     }
     else if(funct3 == "010"){//sw - 32 bits
         string address;
         string byte;
         long add = t[r1] + data2;//get address
         address = bin2str(add);//convert to a string
-        //cout << "SW ADDRESS : " << address << endl;
         long store = t[r2] + data1;
         byte = bin2str(store);
-        //cout << "checking sw" << endl;
         hashInsert(address, store, &h);//puts the data to that address
+        cout << "sw" << endl;
     }
-    
+    pc += 4;
 }
 
 void bType(string instruction){
@@ -402,6 +385,7 @@ void bType(string instruction){
     r2 = stol(rs2, nullptr, 2);
 
     if(funct3 == "000"){//beq
+        cout << "beq" << endl;
         if(t[r1] == t[r2]){
             immed1 = signExtend(immed1 + "0");
             long data = stol(immed1, nullptr, 2);
@@ -412,6 +396,7 @@ void bType(string instruction){
         }
     }
     else if(funct3 == "001"){//bne
+        cout << "bne" << endl;
         if(t[r1] != t[r2]){
             immed1 = signExtend(immed1 + "0");
             long data = stol(immed1, nullptr, 2);
@@ -422,6 +407,7 @@ void bType(string instruction){
         }
     }
     else if(funct3 == "100"){//blt
+        cout << "blt" << endl;
         if(t[r1] < t[r2]){
             immed1 = signExtend(immed1 + "0");
             long data = stol(immed1, nullptr, 2);
@@ -433,6 +419,7 @@ void bType(string instruction){
 
     }
     else if(funct3 == "101"){//bge
+        cout << "bge" << endl;
         if(t[r1] >= t[r2]){
             immed1 = signExtend(immed1 + "0");
             long data = stol(immed1, nullptr, 2);
@@ -443,6 +430,7 @@ void bType(string instruction){
         }
     }
     else if(funct3 == "110"){//bltu
+        cout << "bltu" << endl;
         if((unsigned long)t[r1] < (unsigned long)t[r2]){
             immed1 = signExtend(immed1 + "0");
             long data = stol(immed1, nullptr, 2);
@@ -453,6 +441,7 @@ void bType(string instruction){
         }
     }
     else if(funct3 == "111"){//bgeu
+        cout << "bgeu" << endl;
         if((unsigned long)t[r1] >= (unsigned long)t[r2]){
             immed1 = signExtend(immed1 + "0");
             long data = stol(immed1, nullptr, 2);
@@ -575,31 +564,39 @@ void decode(string instruction){
     
     //determine the type of operation
     if(opcode == "0010011"){//i - type instructions
-        //cout << "I type instruction" << endl;
+        cout << "i - type instruction" << endl;
         iType(instruction);
     }
     else if(opcode == "0110011"){//r - type instrucitons
+        cout << "r - type instruction" << endl;
         rType(instruction);
     }
     else if(opcode == "0000011"){//l - type instructions
+        cout << "l - type instruction" << endl;
         lType(instruction);
     }
     else if(opcode == "0100011"){//s - type instructions
+        cout << "s - type instruction" << endl;
         sType(instruction);
     }
-    else if(opcode == " "){//branch - type instructions
+    else if(opcode == "1100011"){//branch - type instructions
+        cout << "branch - type instruction" << endl;
         bType(instruction);
     }
     else if(opcode == "0110111"){//lui instruction
+        cout << "lui instruction" << endl;
         LUI(instruction);
     }
     else if(opcode == "0010111"){//auipc instruction
+        cout << "auipc instruction" << endl;
         AUIPC(instruction);
     }
     else if(opcode == "110111"){//jal instruction
+        cout << "jal instruction" << endl;
         JAL(instruction);
     }
     else if(opcode == "1100111"){//jalr instruction
+        cout << "jalr instruction" << endl;
         JALR(instruction);
     }
 }
@@ -660,11 +657,11 @@ int main() {
 
     //reset pc for instructions
     pc = 0;
+
     int count = 1;
     while(1){
         printCommands();
         cin >> command;
-
         if(command == "r"){
             for(int i = 0; i < rom.size(); i++){
             cout << "instruction : " << rom[count -1].instruction << endl;
