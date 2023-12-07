@@ -9,6 +9,7 @@ using namespace std;
 
 int t[32];//global array of registers
 long pc;
+vector<instr> rom;//instruction memory
 
 typedef struct instr{
     string instruction;//holds 32 bits of the instruction
@@ -525,13 +526,16 @@ Update the PC to jump to the target address.
 void JAL(string instruction){
     cout << instruction << endl;
     string immed1, immed2, immed3, immed4, fullImmed, rd;
-    immed1 = instruction.substr(0,1);// 1bits immed[20]
-    immed2 = instruction.substr(1,10);// 9bits immed[10:1]
-    immed3 = instruction.substr(11,1);// 1bits immed[11]
+    immed1 = instruction.substr(11,1);// 1bits signed bit
+    immed2 = instruction.substr(1,10);// 10bits immed[10:1]
+    immed3 = instruction.substr(20,1);// 1bits immed[11]
     immed4 = instruction.substr(12,8);// 7bits immed[19:12]
     fullImmed = immed1 + immed2 + immed3 + immed4;
-    string temp = signExtend(fullImmed);
+    string temp = signExtend(fullImmed);//sign extend to 32 bits\
+    //temp is the offset of the target address
+    //rd is the return address
     rd = instruction.substr(20,5);// 5 bits for destination
+
     long data = stol(fullImmed, nullptr, 2);
     long data_rd = stol(rd, nullptr, 2);
     if(fullImmed[0] == '1'){//check if the number is negative in binary
@@ -540,8 +544,14 @@ void JAL(string instruction){
     t[data_rd] = pc + 4;//this is to store the return address
     pc += data; // we then jump to the target address
 
+    //run the instruction we are jumping to
+    cout << "instruction : " << rom[pc/4].instruction << endl;
+    cout << "instruction #" << pc/4 << "/" << rom.size() << endl;
+    decode(rom[pc/4].instruction);
+    printReg(); 
 
-
+    //return to the original instruction
+    pc = t[data_rd];   
 }
 
 
@@ -637,7 +647,6 @@ void printReg(){
 
 int main() {
     string file = "line.dat";
-    vector<instr> rom;
 
     pc = 0;
 
@@ -699,6 +708,5 @@ int main() {
             break;
         }
     }
-    
     return 0;
 }
