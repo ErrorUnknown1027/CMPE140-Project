@@ -21,7 +21,7 @@ void instrInit(instr *i){
 }
 
 string bin2str(long bin){//converts any long into a 32 bit string
-    string binary; 
+    string binary;
     int bits = 32;
     for(int i = bits -1; i >= 0; i--){
         int bit = (bin >> i) & 1;
