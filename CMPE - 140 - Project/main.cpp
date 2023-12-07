@@ -404,23 +404,63 @@ void bType(string instruction){
     if(funct3 == "000"){//beq
         if(t[r1] == t[r2]){
             immed1 = signExtend(immed1 + "0");
-            //return this address
+            long data = stol(immed1, nullptr, 2);
+            if(immed1[0] == '1'){//checking is signed
+                data = data - pow(2, immed1.length());
+            }
+            pc = pc + data;
         }
     }
     else if(funct3 == "001"){//bne
-
+        if(t[r1] != t[r2]){
+            immed1 = signExtend(immed1 + "0");
+            long data = stol(immed1, nullptr, 2);
+            if(immed1[0] == '1'){//checking is signed
+                data = data - pow(2, immed1.length());
+            }
+            pc = pc + data;
+        }
     }
     else if(funct3 == "100"){//blt
+        if(t[r1] < t[r2]){
+            immed1 = signExtend(immed1 + "0");
+            long data = stol(immed1, nullptr, 2);
+            if(immed1[0] == '1'){//checking is signed
+                data = data - pow(2, immed1.length());
+            }
+            pc = pc + data;
+        }
 
     }
     else if(funct3 == "101"){//bge
-
+        if(t[r1] >= t[r2]){
+            immed1 = signExtend(immed1 + "0");
+            long data = stol(immed1, nullptr, 2);
+            if(immed1[0] == '1'){//checking is signed
+                data = data - pow(2, immed1.length());
+            }
+            pc = pc + data;
+        }
     }
     else if(funct3 == "110"){//bltu
-
+        if((unsigned long)t[r1] < (unsigned long)t[r2]){
+            immed1 = signExtend(immed1 + "0");
+            long data = stol(immed1, nullptr, 2);
+            if(immed1[0] == '1'){//checking is signed
+                data = data - pow(2, immed1.length());
+            }
+            pc = pc + data;
+        }
     }
     else if(funct3 == "111"){//bgeu
-
+        if((unsigned long)t[r1] >= (unsigned long)t[r2]){
+            immed1 = signExtend(immed1 + "0");
+            long data = stol(immed1, nullptr, 2);
+            if(immed1[0] == '1'){//checking is signed
+                data = data - pow(2, immed1.length());
+            }
+            pc = pc + data;
+        }
     }
 }
 
