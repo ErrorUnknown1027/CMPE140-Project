@@ -464,6 +464,109 @@ void bType(string instruction){
     }
 }
 
+/* LUI
+Extract the bits imm[31:12] to form a 20-bit immediate value.
+Left-shift the 20-bit immediate value by 12 bits.
+Store the left-shifted immediate value in the destination register rd.
+ */
+void LUI(string instruction){
+    string immed, rd;
+    immed = instruction.substr(0, 20);// 7 bits
+    string temp = signExtend(immed);
+    rd = instruction.substr(7,5);// 5 bits
+    long data = stol(immed, nullptr, 2);
+    data = data<<12;//shifts over 12 bits (load upper immediate)
+    if(immed[0] == '1'){//check if the number is negative in binary
+        data = data - pow(2, immed.length());//sub from the largest possible negative number
+    }
+    long data_rd = stol(rd, nullptr, 2);//changes
+    t[data_rd] = data;//put the data into the destination reg
+    pc += 4;//program counter
+
+}
+
+/*AUIPC
+Extract the bits imm[31:12] to form a 20-bit immediate value.
+Left-shift the 20-bit immediate value by 12 bits.
+Add the left-shifted immediate value to the current PC (program counter).
+Store the result in the destination register rd.
+ */
+void AUIPC(string instruction){
+    string immed, rd;
+    immed = instruction.substr(0, 20);// 7 bits
+    string temp = signExtend(immed);
+    long data = stol(temp, nullptr, 2);
+    rd = instruction.substr(7,5);// 5 bits
+    if(immed[0] == '1'){//check if the number is negative in binary
+        data = data - pow(2, immed.length());//sub from the largest possible negative number
+    }
+    data = data << 12;//left shit 12 bits
+    long data_rd = stol(rd, nullptr, 2);
+    t[data_rd] = pc + data;//add data to pc , then store
+    pc +=4;
+
+}
+
+
+/* for JAL - chatgpt
+Concatenate the bits imm[20], imm[10:1], imm[11], and imm[19:12] to form a 20-bit immediate value.
+Sign-extend the 20-bit immediate value to 32 bits.
+Add the sign-extended immediate value to the current PC (program counter) to compute the target address.
+Store the address of the next instruction (PC + 4) in the destination register rd.
+Update the PC to jump to the target address.
+ */
+void JAL(string instruction){
+    cout << instruction << endl;
+    string immed1, immed2, immed3, immed4, fullImmed, rd;
+    immed1 = instruction.substr(0,1);// 1bits immed[20]
+    immed2 = instruction.substr(1,10);// 9bits immed[10:1]
+    immed3 = instruction.substr(11,1);// 1bits immed[11]
+    immed4 = instruction.substr(12,8);// 7bits immed[19:12]
+    fullImmed = immed1 + immed2 + immed3 + immed4;
+    string temp = signExtend(fullImmed);
+    rd = instruction.substr(7,5);// 5 bits for destination
+    long data = stol(fullImmed, nullptr, 2);
+    long data_rd = stol(rd, nullptr, 2);
+    if(fullImmed[0] == '1'){//check if the number is negative in binary
+        data = data - pow(2, fullImmed.length());//sub from the largest possible negative number
+    }
+    t[data_rd] = pc + 4;//this is to store the return address
+    pc += data; // we then jump to the target address
+
+
+
+}
+
+
+/* for jalr (from chatgpt)
+Concatenate the bits imm[11:0] and rs1 to form a 12-bit immediate value.
+Sign-extend the 12-bit immediate value to 32 bits.
+Add the sign-extended immediate value to the value in register rs1 to compute the target address.
+Store the address of the next instruction (PC + 4) in the destination register rd.
+Update the PC to jump to the target address.
+*/
+
+void JALR(string instruction){
+    string immed, rd, funct3, rs1;
+    immed = instruction.substr(0,12);// 1 bits
+    funct3 = instruction.substr(12,3);// 3 bit
+    rs1 = instruction.substr(15, 5);//5 bits
+    string temp = signExtend(immed);
+    rd = instruction.substr(7,5);// 5 bits
+    long data = stol(immed, nullptr, 2);
+    long data_rd = stol(rd, nullptr, 2);
+    long data_rs1 = stol(rs1, nullptr, 2);
+    if(immed[0] == '1'){//check if the number is negative in binary
+        data = data - pow(2, immed.length());//sub from the largest possible negative number
+    }
+    if(funct3 == "000"){
+    t[data_rd] = pc + 4;
+    pc = ((t[data_rs1] + data) & ~1); //jumps to the address the ~1 according to chat gpt is to ensure that the rightmost
+                                      //bit is going to be always 0 so that it aligns with the target address to a word
+    }
+
+}
+
 void decode(string instruction){
     //find opcode
     string opcode;
@@ -485,6 +588,18 @@ void decode(string instruction){
     }
     else if(opcode == " "){//branch - type instructions
         bType(instruction);
+    }
+    else if(opcode == "0110111"){//lui instruction
+        LUI(instruction);
+    }
+    else if(opcode == "0010111"){//auipc instruction
+        AUIPC(instruction);
+    }
+    else if(opcode == "110111"){//jal instruction
+        JAL(instruction);
+    }
+    else if(opcode == "1100111"){//jalr instruction
+        JALR(instruction);
     }
 }
 
