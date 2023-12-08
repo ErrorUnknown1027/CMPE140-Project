@@ -372,14 +372,30 @@ void sType(string instruction){
 }
 
 void bType(string instruction){
-    string funct3, rs1, rs2, rd, immed1, immed2;
+    string funct3, rs1, rs2, rd, immed1, immed2, immed3, immed4;
     //decode
-    immed1 = instruction.substr(0,7);// 7 bits
-    immed2 = instruction.substr(20,5);// 5 bits
+    /*00000000000000111101011001100011*/
+    immed1 = instruction.substr(19,1);//imm[12]
+    //cout << immed1 << endl;
+    immed2 = instruction.substr(21,6);//imm[10:5]
+    //cout << immed2 << endl;
+    immed3 = instruction.substr(27,5);//imm[4:1]
+    //cout << immed3 << endl;
+    immed4 = instruction.substr(20,1);//imm[11]
+    //cout << immed4 << endl;
     funct3 = instruction.substr(17,3);// 3 bits
     rs1 = instruction.substr(12,5);// 5 bits
     rs2 = instruction.substr(7,5);// 5 bits
     rd = instruction.substr(20, 5);// 5 bits
+
+    // string temp = immed3 + immed4 + '0';
+    // long data = stol(temp,nullptr,2);
+    // cout << temp << endl;
+    // cout << stol(temp,nullptr,2) << endl;
+    // if(temp[0] == '1'){//checking is signed
+    //     data = data - pow(2, temp.length());
+    // }
+    // cout << data << endl;
 
     //convert to long
     long r1, r2;
@@ -389,10 +405,10 @@ void bType(string instruction){
     if(funct3 == "000"){//beq
         cout << "beq" << endl;
         if(t[r1] == t[r2]){
-            immed1 = signExtend(immed1 + "0");
-            long data = stol(immed1, nullptr, 2);
-            if(immed1[0] == '1'){//checking is signed
-                data = data - pow(2, immed1.length());
+            string temp = immed3 + immed4 + '0';
+            long data = stol(temp, nullptr, 2);
+            if(temp[0] == '1'){//checking is signed
+                data = data - pow(2, temp.length());
             }
             pc = pc + data;
         }
@@ -403,10 +419,10 @@ void bType(string instruction){
     else if(funct3 == "001"){//bne
         cout << "bne" << endl;
         if(t[r1] != t[r2]){
-            immed1 = signExtend(immed1 + "0");
-            long data = stol(immed1, nullptr, 2);
-            if(immed1[0] == '1'){//checking is signed
-                data = data - pow(2, immed1.length());
+            string temp = immed3 + immed4 + '0';
+            long data = stol(temp, nullptr, 2);
+            if(temp[0] == '1'){//checking is signed
+                data = data - pow(2, temp.length());
             }
             pc = pc + data;
         }
@@ -431,20 +447,14 @@ void bType(string instruction){
     else if(funct3 == "101"){//bge
         cout << "bge" << endl;
         if(t[r1] >= t[r2]){
-            cout << "in if statement" << endl;
-            cout << "t[r1] : " << t[r1] << endl;
-            cout << "t[r2] : " << t[r2] << endl;
-            immed1 = signExtend(immed1 + "0");
-            long data = stol(immed1, nullptr, 2);
-            if(immed1[0] == '1'){//checking is signed
-                data = data - pow(2, immed1.length());
+            string temp = immed3 + immed4 + '0';
+            long data = stol(temp, nullptr, 2);
+            if(temp[0] == '1'){//checking is signed
+                data = data - pow(2, temp.length());
             }
-            cout << immed1 << endl;
-            cout << data << endl;
             pc = pc + data;
         }
         else{//else move on to the next instruction
-            cout << "bge, else statement" << endl;
             pc += 4;
         }
     }
@@ -611,7 +621,8 @@ void printReg(){
     cout << "register t(2) : " << t[7] << endl;
     cout << "register t(3) : " << t[28] << endl;
     cout << "register t(4) : " << t[29] << endl;
-    cout << "register t(5) : " << t[30] << endl << endl << endl;
+    cout << "register t(5) : " << t[30] << endl;
+    cout << "register t(6) : " << t[31] << endl << endl << endl;
 }
 
 int main() {
@@ -674,7 +685,7 @@ int main() {
             t[0] = 0;
             printReg();
         }
-        if(pc/4 >= rom.size()){
+        if(pc/4 > rom.size()){
             break;
         }
     }
