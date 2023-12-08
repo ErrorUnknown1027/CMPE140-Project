@@ -374,28 +374,13 @@ void sType(string instruction){
 void bType(string instruction){
     string funct3, rs1, rs2, rd, immed1, immed2, immed3, immed4;
     //decode
-    /*00000000000000111101011001100011*/
     immed1 = instruction.substr(19,1);//imm[12]
-    //cout << immed1 << endl;
     immed2 = instruction.substr(21,6);//imm[10:5]
-    //cout << immed2 << endl;
     immed3 = instruction.substr(27,5);//imm[4:1]
-    //cout << immed3 << endl;
     immed4 = instruction.substr(20,1);//imm[11]
-    //cout << immed4 << endl;
     funct3 = instruction.substr(17,3);// 3 bits
     rs1 = instruction.substr(12,5);// 5 bits
     rs2 = instruction.substr(7,5);// 5 bits
-    rd = instruction.substr(20, 5);// 5 bits
-
-    // string temp = immed3 + immed4 + '0';
-    // long data = stol(temp,nullptr,2);
-    // cout << temp << endl;
-    // cout << stol(temp,nullptr,2) << endl;
-    // if(temp[0] == '1'){//checking is signed
-    //     data = data - pow(2, temp.length());
-    // }
-    // cout << data << endl;
 
     //convert to long
     long r1, r2;
@@ -405,7 +390,7 @@ void bType(string instruction){
     if(funct3 == "000"){//beq
         cout << "beq" << endl;
         if(t[r1] == t[r2]){
-            string temp = immed3 + immed4 + '0';
+            string temp = immed3 + immed4 + '0'; //'0' add a left shift
             long data = stol(temp, nullptr, 2);
             if(temp[0] == '1'){//checking is signed
                 data = data - pow(2, temp.length());
@@ -419,7 +404,7 @@ void bType(string instruction){
     else if(funct3 == "001"){//bne
         cout << "bne" << endl;
         if(t[r1] != t[r2]){
-            string temp = immed3 + immed4 + '0';
+            string temp = immed3 + immed4 + '0'; //'0' add a left shift
             long data = stol(temp, nullptr, 2);
             if(temp[0] == '1'){//checking is signed
                 data = data - pow(2, temp.length());
@@ -433,7 +418,7 @@ void bType(string instruction){
     else if(funct3 == "100"){//blt
         cout << "blt" << endl;
         if(t[r1] < t[r2]){
-            immed1 = signExtend(immed1 + "0");
+            immed1 = signExtend(immed1 + "0"); //'0' add a left shift
             long data = stol(immed1, nullptr, 2);
             if(immed1[0] == '1'){//checking is signed
                 data = data - pow(2, immed1.length());
@@ -447,7 +432,7 @@ void bType(string instruction){
     else if(funct3 == "101"){//bge
         cout << "bge" << endl;
         if(t[r1] >= t[r2]){
-            string temp = immed3 + immed4 + '0';
+            string temp = immed3 + immed4 + '0'; //'0' add a left shift
             long data = stol(temp, nullptr, 2);
             if(temp[0] == '1'){//checking is signed
                 data = data - pow(2, temp.length());
@@ -461,7 +446,7 @@ void bType(string instruction){
     else if(funct3 == "110"){//bltu
         cout << "bltu" << endl;
         if((unsigned long)t[r1] < (unsigned long)t[r2]){
-            immed1 = signExtend(immed1 + "0");
+            immed1 = signExtend(immed1 + "0"); //'0' add a left shift
             long data = stol(immed1, nullptr, 2);
             if(immed1[0] == '1'){//checking is signed
                 data = data - pow(2, immed1.length());
@@ -475,7 +460,7 @@ void bType(string instruction){
     else if(funct3 == "111"){//bgeu
         cout << "bgeu" << endl;
         if((unsigned long)t[r1] >= (unsigned long)t[r2]){
-            immed1 = signExtend(immed1 + "0");
+            immed1 = signExtend(immed1 + "0"); //'0' add a left shift
             long data = stol(immed1, nullptr, 2);
             if(immed1[0] == '1'){//checking is signed
                 data = data - pow(2, immed1.length());
@@ -488,20 +473,13 @@ void bType(string instruction){
     }
 }
 
-/* LUI
-Extract the bits imm[31:12] to form a 20-bit immediate value.
-Left-shift the 20-bit immediate value by 12 bits.
-Store the left-shifted immediate value in the destination register rd.
- */
 void LUI(string instruction){
     string immed, rd;
     immed = instruction.substr(0, 20);// 7 bits
     string temp = signExtend(immed);
-    //cout << temp << endl;
     rd = instruction.substr(20,5);// 5 bits
     long data = stol(immed, nullptr, 2);
     data = data<<12;//shifts over 12 bits (load upper immediate)
-    //cout << data << endl;
     if(immed[0] == '1'){//check if the number is negative in binary
         data = data - pow(2, immed.length());//sub from the largest possible negative number
     }
@@ -510,12 +488,6 @@ void LUI(string instruction){
     pc += 4;//program counter
 }
 
-/*AUIPC
-Extract the bits imm[31:12] to form a 20-bit immediate value.
-Left-shift the 20-bit immediate value by 12 bits.
-Add the left-shifted immediate value to the current PC (program counter).
-Store the result in the destination register rd.
- */
 void AUIPC(string instruction){
     string immed, rd;
     immed = instruction.substr(0, 20);// 7 bits
@@ -531,14 +503,6 @@ void AUIPC(string instruction){
     pc +=4;
 
 }
-
-/* for jalr (from chatgpt)
-Concatenate the bits imm[11:0] and rs1 to form a 12-bit immediate value.
-Sign-extend the 12-bit immediate value to 32 bits.
-Add the sign-extended immediate value to the value in register rs1 to compute the target address.
-Store the address of the next instruction (PC + 4) in the destination register rd.
-Update the PC to jump to the target address.
-*/
 
 void JALR(string instruction){
     string immed, rd, funct3, rs1;
@@ -627,24 +591,25 @@ void printReg(){
 
 int main() {
     string file = "line.dat";
-
     pc = 0;
 
     hashInit(&h);
-    string addressTemp = "00010000000000010000000000000000"; //m = -3 from dat
+
+    //m = -3 from dat
+    string addressTemp = "00010000000000010000000000000000";
     hashInsert(addressTemp, -3,&h);
 
-    addressTemp = "00010000000000010000000000000100"; //x = 7 from dat
+    //x = 7 from dat
+    addressTemp = "00010000000000010000000000000100";
     hashInsert(addressTemp, 7,&h);
 
-    addressTemp = "00010000000000010000000000001000"; //c = 25 from dat
+    //c = 25 from dat
+    addressTemp = "00010000000000010000000000001000";
     hashInsert(addressTemp, 25,&h);
 
-    //00010000000000010000000000001100
-    addressTemp = "00010000000000010000000000001100"; //y = -1 from dat
+    //y = -1 from dat
+    addressTemp = "00010000000000010000000000001100";
     hashInsert(addressTemp, -1,&h);
-
-    //loadInstr(&rom, "dmem.dat");
 
     loadInstr(&rom, file);
 
@@ -653,11 +618,6 @@ int main() {
     }
     
     cout << "instructions loaded" << endl;
-
-    // for(int i = 0; i < rom.size(); i++){
-    //     cout << "Instruction : " << rom[i].instruction << endl;
-    //     cout << "At address : " << rom[i].address << "(" << stol(rom[i].address, nullptr, 2) << ")" << endl << endl;
-    // }
 
     string command;
 
@@ -692,13 +652,6 @@ int main() {
     return 0;
 }
 
-/* for JAL - chatgpt
-Concatenate the bits imm[20], imm[10:1], imm[11], and imm[19:12] to form a 20-bit immediate value.
-Sign-extend the 20-bit immediate value to 32 bits.
-Add the sign-extended immediate value to the current PC (program counter) to compute the target address.
-Store the address of the next instruction (PC + 4) in the destination register rd.
-Update the PC to jump to the target address.
- */
 void JAL(string instruction){
     cout << instruction << endl;
     string immed1, immed2, immed3, immed4, fullImmed, rd;
