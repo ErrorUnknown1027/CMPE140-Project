@@ -35,8 +35,8 @@ void nodeInit(node *n){
 const int ELEMENTS = 512; //2^16 - 2^32 seems like a lot of space
 
 int hashS(string address){
-    int index = stoi(address, nullptr, 2);
-    return index % ELEMENTS;
+    long index = stol(address, nullptr, 2);
+    return (index) % ELEMENTS;
 }
 
 typedef struct hashTable{// this will act as memory
@@ -374,8 +374,8 @@ void sType(string instruction){
 void bType(string instruction){
     string funct3, rs1, rs2, rd, immed1, immed2, immed3, immed4;
     //decode
-    immed1 = instruction.substr(19,1);//imm[12]
-    immed2 = instruction.substr(21,6);//imm[10:5]
+    //immed1 = instruction.substr(19,1);//imm[12]
+    //immed2 = instruction.substr(21,6);//imm[10:5]
     immed3 = instruction.substr(27,5);//imm[4:1]
     immed4 = instruction.substr(20,1);//imm[11]
     funct3 = instruction.substr(17,3);// 3 bits
@@ -519,10 +519,8 @@ void JALR(string instruction){
     }
     if(funct3 == "000"){
     t[data_rd] = pc + 4;
-    pc = ((t[data_rs1] + data) & ~1); //jumps to the address the ~1 according to chat gpt is to ensure that the rightmost
-                                      //bit is going to be always 0 so that it aligns with the target address to a word
+    pc = ((t[data_rs1] + data) & ~1); //jumps to the address the ~1 is to ensure that the rightmost
     }
-
 }
 
 void JAL(string instruction);//function declaration
@@ -589,37 +587,61 @@ void printReg(){
     cout << "register t(6) : " << t[31] << endl << endl << endl;
 }
 
+void printAtAddres(string address){
+    //convert hex to binary
+    string temp;
+    long ad = stol(address.substr(2, address.length()), nullptr, 16);
+    temp = bin2str(ad);
+    if(address[3] >= '8'){//data memory
+        long data = hashPull(temp, &h);
+        cout << "Address : " << address << endl;
+        cout << "Data : " << data << endl;
+        return;
+    }
+    else{//instruction memory
+        for(int i = 0; i < rom.size(); i++){
+            if(rom[i].address == address){
+                cout << "Address : " << address << endl;
+                cout << "Data : " << rom[i].instruction << endl;
+                return;
+            }
+        }
+        //double check
+        long data = hashPull(temp, &h);
+        cout << "Address : " << address << endl;
+        cout << "Data : " << bin2str(data) << endl;
+        return;
+    }
+    cout << "Address not found" << endl;
+}
+
 int main() {
     string file = "line.dat";
+    string command = "";
     pc = 0;
+
+    for(int i = 0; i < 32; i++){//initialize the registers
+        t[i] = 0; 
+    }
 
     hashInit(&h);
 
     //m = -3 from dat
     string addressTemp = "00010000000000010000000000000000";
     hashInsert(addressTemp, -3,&h);
-
     //x = 7 from dat
     addressTemp = "00010000000000010000000000000100";
     hashInsert(addressTemp, 7,&h);
-
     //c = 25 from dat
     addressTemp = "00010000000000010000000000001000";
     hashInsert(addressTemp, 25,&h);
-
     //y = -1 from dat
     addressTemp = "00010000000000010000000000001100";
     hashInsert(addressTemp, -1,&h);
 
+    //load instructions
     loadInstr(&rom, file);
-
-    for(int i = 0; i < 32; i++){//initialize the registers
-        t[i] = 0; 
-    }
-    
     cout << "instructions loaded" << endl;
-
-    string command;
 
     //reset pc for instructions
     pc = 0;
@@ -631,7 +653,7 @@ int main() {
         if(command == "r"){
             while(pc/4 < rom.size()){
             cout << "instruction : " << rom[pc/4].instruction << endl;
-            cout << "instruction #" << pc/4 << "/" << rom.size() << endl;
+            cout << "instruction #" << (pc/4) + 1 << "/" << rom.size() << endl;
             decode(rom[pc/4].instruction);
             t[0] = 0;
             printReg();
@@ -640,14 +662,24 @@ int main() {
         }
         if(command == "s"){
             cout << "instruction : " << rom[pc/4].instruction << endl;
-            cout << "instruction # " << pc/4 << "/" << rom.size() << endl;
+            cout << "instruction # " << (pc/4) + 1 << "/" << rom.size() << endl;
             decode(rom[pc/4].instruction);
-            t[0] = 0;
             printReg();
+        }
+        if(command[0] == 'x'){
+            int temp = stoi(command.substr(1,command.length()), nullptr, 10);
+            cout << "register x" << temp << " : " << t[temp] << endl << endl;
+        }
+        if(command == "pc"){
+            cout << "pc : " << bin2str(pc) << " ( " << pc << " )" << endl << endl;
         }
         if(pc/4 > rom.size()){
             break;
         }
+        if(command[0] == '0' && command[1] == 'x'){
+            printAtAddres(command);
+        }
+        t[0] = 0;
     }
     return 0;
 }
@@ -676,7 +708,4 @@ void JAL(string instruction){
     }
     t[data_rd] = pc + 4;//this is to store the return address
     pc = pc + data; // we then jump to the target address
-    cout << "data : " << data << endl;
-    cout << temp << endl;
-    cout << pc << endl; 
 }
