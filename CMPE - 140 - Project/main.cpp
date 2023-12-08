@@ -339,23 +339,23 @@ void sType(string instruction){
     }
     
     if(funct3 == "000"){//sb - 8 bits WE DONT CARE ABOUT THIS INSTRUCTION
-        string address;
-        string byte;
-        long add = t[r1] + data2;//get address
-        address = bin2str(add);//convert to a string
-        long store = t[r2] + data1;
-        byte = bin2str(store);
-        hashInsert(address, stol(byte.substr(byte.length()-9, 8), nullptr, 2), &h);//puts the data to that address
+        // string address;
+        // string byte;
+        // long add = t[r1] + data2;//get address
+        // address = bin2str(add);//convert to a string
+        // long store = t[r2] + data1;
+        // byte = bin2str(store);
+        // hashInsert(address, stol(byte.substr(byte.length()-9, 8), nullptr, 2), &h);//puts the data to that address
         cout << "sb" << endl;
     }
     else if(funct3 == "001"){//sh - 16 bits WE DONT CARE ABOUT THIS INSTRUCTION
-        string address;
-        string byte;
-        long add = t[r1] + data2;//get address
-        address = bin2str(add);//convert to a string
-        long store = t[r2] + data1;
-        byte = bin2str(store);
-        hashInsert(address, stol(byte.substr(byte.length()-17, 16), nullptr, 2), &h);//puts the data to that address
+        // string address;
+        // string byte;
+        // long add = t[r1] + data2;//get address
+        // address = bin2str(add);//convert to a string
+        // long store = t[r2] + data1;
+        // byte = bin2str(store);
+        // hashInsert(address, stol(byte.substr(byte.length()-17, 16), nullptr, 2), &h);//puts the data to that address
         cout << "sh" << endl;
     }
     else if(funct3 == "010"){//sw - 32 bits
