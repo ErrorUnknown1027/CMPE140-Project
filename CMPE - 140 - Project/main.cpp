@@ -431,14 +431,20 @@ void bType(string instruction){
     else if(funct3 == "101"){//bge
         cout << "bge" << endl;
         if(t[r1] >= t[r2]){
+            cout << "in if statement" << endl;
+            cout << "t[r1] : " << t[r1] << endl;
+            cout << "t[r2] : " << t[r2] << endl;
             immed1 = signExtend(immed1 + "0");
             long data = stol(immed1, nullptr, 2);
             if(immed1[0] == '1'){//checking is signed
                 data = data - pow(2, immed1.length());
             }
+            cout << immed1 << endl;
+            cout << data << endl;
             pc = pc + data;
         }
         else{//else move on to the next instruction
+            cout << "bge, else statement" << endl;
             pc += 4;
         }
     }
@@ -652,22 +658,23 @@ int main() {
         printCommands();
         cin >> command;
         if(command == "r"){
-            for(int i = 0; i < rom.size(); i++){
+            while(pc/4 < rom.size()){
             cout << "instruction : " << rom[pc/4].instruction << endl;
             cout << "instruction #" << pc/4 << "/" << rom.size() << endl;
             decode(rom[pc/4].instruction);
+            t[0] = 0;
             printReg();
             }
             break;
         }
         if(command == "s"){
             cout << "instruction : " << rom[pc/4].instruction << endl;
-            cout << "instruction # " << count << "/" << rom.size() << endl;
+            cout << "instruction # " << pc/4 << "/" << rom.size() << endl;
             decode(rom[pc/4].instruction);
+            t[0] = 0;
             printReg();
-            count++;
         }
-        if(count > rom.size()){
+        if(pc/4 >= rom.size()){
             break;
         }
     }
@@ -688,7 +695,11 @@ void JAL(string instruction){
     immed2 = instruction.substr(1,10);// 10bits immed[10:1]
     immed3 = instruction.substr(20,1);// 1bits immed[11]
     immed4 = instruction.substr(12,8);// 7bits immed[19:12]
-    fullImmed = immed1 + immed2 + immed3 + immed4;
+    cout << immed1 << endl;
+    cout << immed2 << endl;
+    cout << immed3 << endl;
+    cout << immed4 << endl;
+    fullImmed = immed1 + immed4 + immed2 + immed3;
     string temp = signExtend(fullImmed);//sign extend to 32 bits\
     //temp is the offset of the target address
     //rd is the return address
@@ -700,14 +711,8 @@ void JAL(string instruction){
         data = data - pow(2, fullImmed.length());//sub from the largest possible negative number
     }
     t[data_rd] = pc + 4;//this is to store the return address
-    pc += data << 1; // we then jump to the target address
-
-    //run the instruction we are jumping to
-    cout << "instruction : " << rom[pc/4].instruction << endl;
-    cout << "instruction #" << pc/4 << "/" << rom.size() << endl;
-    decode(rom[pc/4].instruction);
-    printReg(); 
-
-    //return to the original instruction
-    pc = t[data_rd];   
+    pc = pc + data; // we then jump to the target address
+    cout << "data : " << data << endl;
+    cout << temp << endl;
+    cout << pc << endl; 
 }
